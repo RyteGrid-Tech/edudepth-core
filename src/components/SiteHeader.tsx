@@ -10,7 +10,7 @@ export function SiteHeader() {
         <span className="hidden sm:inline label-mono text-text-muted ml-1">CONCEPTS</span>
       </Link>
       <div className="flex items-center gap-3 md:gap-6">
-        <Link to="/catalog" className="hidden md:inline label-mono text-text-secondary hover:text-accent transition-colors">Modules</Link>
+        <Link to="/auth" className="hidden md:inline label-mono text-text-secondary hover:text-accent transition-colors">Modules</Link>
         <Link to="/auth" className="label-mono text-text-secondary hover:text-accent transition-colors">Access</Link>
         <Link
           to="/auth"

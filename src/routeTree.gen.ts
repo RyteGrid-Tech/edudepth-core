@@ -9,12 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ConsoleRouteImport } from './routes/console'
+import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
+import { Route as CourseCourseCodeRouteImport } from './routes/course.$courseCode'
+import { Route as AssessmentQuizIdRouteImport } from './routes/assessment.$quizId'
 
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsoleRoute = ConsoleRouteImport.update({
+  id: '/console',
+  path: '/console',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +49,139 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
+  id: '/lesson/$lessonId',
+  path: '/lesson/$lessonId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseCourseCodeRoute = CourseCourseCodeRouteImport.update({
+  id: '/course/$courseCode',
+  path: '/course/$courseCode',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssessmentQuizIdRoute = AssessmentQuizIdRouteImport.update({
+  id: '/assessment/$quizId',
+  path: '/assessment/$quizId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/catalog': typeof CatalogRoute
+  '/console': typeof ConsoleRoute
+  '/profile': typeof ProfileRoute
+  '/assessment/$quizId': typeof AssessmentQuizIdRoute
+  '/course/$courseCode': typeof CourseCourseCodeRoute
+  '/lesson/$lessonId': typeof LessonLessonIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/catalog': typeof CatalogRoute
+  '/console': typeof ConsoleRoute
+  '/profile': typeof ProfileRoute
+  '/assessment/$quizId': typeof AssessmentQuizIdRoute
+  '/course/$courseCode': typeof CourseCourseCodeRoute
+  '/lesson/$lessonId': typeof LessonLessonIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/catalog': typeof CatalogRoute
+  '/console': typeof ConsoleRoute
+  '/profile': typeof ProfileRoute
+  '/assessment/$quizId': typeof AssessmentQuizIdRoute
+  '/course/$courseCode': typeof CourseCourseCodeRoute
+  '/lesson/$lessonId': typeof LessonLessonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/catalog'
+    | '/console'
+    | '/profile'
+    | '/assessment/$quizId'
+    | '/course/$courseCode'
+    | '/lesson/$lessonId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth'
-  id: '__root__' | '/' | '/auth'
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/catalog'
+    | '/console'
+    | '/profile'
+    | '/assessment/$quizId'
+    | '/course/$courseCode'
+    | '/lesson/$lessonId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/catalog'
+    | '/console'
+    | '/profile'
+    | '/assessment/$quizId'
+    | '/course/$courseCode'
+    | '/lesson/$lessonId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  CatalogRoute: typeof CatalogRoute
+  ConsoleRoute: typeof ConsoleRoute
+  ProfileRoute: typeof ProfileRoute
+  AssessmentQuizIdRoute: typeof AssessmentQuizIdRoute
+  CourseCourseCodeRoute: typeof CourseCourseCodeRoute
+  LessonLessonIdRoute: typeof LessonLessonIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/console': {
+      id: '/console'
+      path: '/console'
+      fullPath: '/console'
+      preLoaderRoute: typeof ConsoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -65,12 +191,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lesson/$lessonId': {
+      id: '/lesson/$lessonId'
+      path: '/lesson/$lessonId'
+      fullPath: '/lesson/$lessonId'
+      preLoaderRoute: typeof LessonLessonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/$courseCode': {
+      id: '/course/$courseCode'
+      path: '/course/$courseCode'
+      fullPath: '/course/$courseCode'
+      preLoaderRoute: typeof CourseCourseCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assessment/$quizId': {
+      id: '/assessment/$quizId'
+      path: '/assessment/$quizId'
+      fullPath: '/assessment/$quizId'
+      preLoaderRoute: typeof AssessmentQuizIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  CatalogRoute: CatalogRoute,
+  ConsoleRoute: ConsoleRoute,
+  ProfileRoute: ProfileRoute,
+  AssessmentQuizIdRoute: AssessmentQuizIdRoute,
+  CourseCourseCodeRoute: CourseCourseCodeRoute,
+  LessonLessonIdRoute: LessonLessonIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

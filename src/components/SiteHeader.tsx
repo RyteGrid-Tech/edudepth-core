@@ -3,7 +3,7 @@ import logo from "@/assets/edudepth-logo.png";
 
 export function SiteHeader() {
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between h-14 px-5 md:px-8 border-b border-border bg-bg-primary">
+    <nav className="sticky top-0 z-50 flex items-center justify-between h-14 px-5 md:px-8 border-b border-border bg-bg-surface">
       <Link to="/" className="flex items-center gap-2.5">
         <img src={logo} alt="EduDepth Concepts" className="h-7 w-7 object-contain bg-text-primary p-0.5" />
         <span className="text-sm font-bold tracking-wider text-text-primary">EDUDEPTH</span>
@@ -14,7 +14,7 @@ export function SiteHeader() {
         <Link to="/auth" className="label-mono text-text-secondary hover:text-accent transition-colors">Access</Link>
         <Link
           to="/auth"
-          className="label-mono border border-accent text-accent px-3 py-1.5 hover:bg-accent hover:text-bg-primary transition-colors font-semibold"
+          className="label-mono bg-text-primary text-bg-surface px-4 py-2 hover:bg-accent-dim transition-colors font-bold"
         >
           Initialize →
         </Link>

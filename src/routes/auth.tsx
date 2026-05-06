@@ -171,7 +171,7 @@ function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full label-mono bg-accent text-bg-primary px-6 py-4 font-bold hover:bg-accent-dim transition-colors disabled:opacity-50 mt-px"
+              className="w-full label-mono bg-accent text-white px-6 py-4 font-bold hover:bg-accent-dim transition-colors disabled:opacity-50 mt-px"
             >
               {loading ? (
                 <span>PROCESSING<span className="blink"></span></span>

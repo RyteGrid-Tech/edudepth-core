@@ -58,7 +58,7 @@ function ConsolePage() {
             <Link
               to="/lesson/$lessonId"
               params={{ lessonId: "l3" }}
-              className="inline-block label-mono bg-accent text-bg-primary px-5 py-3 mt-5 font-bold hover:bg-accent-dim transition-colors"
+              className="inline-block label-mono bg-accent text-white px-5 py-3 mt-5 font-bold hover:bg-accent-dim transition-colors"
             >
               RESUME LESSON →
             </Link>

@@ -72,7 +72,7 @@ function AssessmentPage() {
           <Link
             to="/course/$courseCode"
             params={{ courseCode: q.course }}
-            className="inline-block label-mono bg-accent text-bg-primary px-6 py-3 mt-8 font-bold hover:bg-accent-dim transition-colors"
+            className="inline-block label-mono bg-accent text-white px-6 py-3 mt-8 font-bold hover:bg-accent-dim transition-colors"
           >
             RETURN TO MODULE →
           </Link>
@@ -125,7 +125,7 @@ function AssessmentPage() {
         <button
           onClick={submit}
           disabled={Object.keys(answers).length !== q.questions.length}
-          className="w-full md:w-auto label-mono bg-accent text-bg-primary px-8 py-4 mt-6 font-bold hover:bg-accent-dim transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full md:w-auto label-mono bg-accent text-white px-8 py-4 mt-6 font-bold hover:bg-accent-dim transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           SUBMIT ASSESSMENT →
         </button>

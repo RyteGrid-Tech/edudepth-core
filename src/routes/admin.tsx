@@ -106,7 +106,7 @@ function AdminPage() {
               <TextArea label="QUESTIONS (JSON)" placeholder='[{"q":"...","options":["A","B","C","D"],"correct":1}]' mono />
             </>
           )}
-          <button type="submit" className="w-full label-mono bg-accent text-bg-primary py-4 font-bold hover:bg-accent-dim transition-colors mt-px">
+          <button type="submit" className="w-full label-mono bg-accent text-white py-4 font-bold hover:bg-accent-dim transition-colors mt-px">
             DEPLOY {section} →
           </button>
         </form>

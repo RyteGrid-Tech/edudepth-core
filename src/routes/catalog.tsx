@@ -78,7 +78,7 @@ function CatalogPage() {
                   <Link
                     to="/course/$courseCode"
                     params={{ courseCode: m.code }}
-                    className="block label-mono text-center bg-bg-surface text-accent border border-accent py-2.5 hover:bg-accent hover:text-bg-primary transition-colors"
+                    className="block label-mono text-center bg-bg-surface text-accent border border-accent py-2.5 hover:bg-accent hover:text-white transition-colors"
                   >
                     OPEN MODULE →
                   </Link>

@@ -191,7 +191,7 @@ function AuthPage() {
           </div>
 
           <button
-            onClick={() => {/* TODO: connect to Supabase — supabase.auth.signInWithOAuth({ provider: 'google' }) */}}
+            onClick={handleGoogle}
             className="w-full label-mono border border-border text-text-primary py-3.5 hover:border-accent hover:text-accent transition-colors"
           >
             ACCESS VIA GOOGLE

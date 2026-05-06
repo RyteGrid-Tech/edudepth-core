@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import logo from "@/assets/edudepth-logo.png";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/auth")({
 const CLASS_LEVELS = ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3", "Post-secondary"];
 
 function AuthPage() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,12 +26,40 @@ function AuthPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    // TODO: connect to Supabase
-    // if (mode === 'signup') await supabase.auth.signUp({ email, password, options: { data: { full_name, class_level } } })
-    // else await supabase.auth.signInWithPassword({ email, password })
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setError("Connection failed. Check network and retry.");
+    try {
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: {
+            emailRedirectTo: window.location.origin + "/console",
+            data: { full_name: form.name, class_level: form.level },
+          },
+        });
+        if (error) throw error;
+        navigate({ to: "/console" });
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password,
+        });
+        if (error) throw error;
+        navigate({ to: "/console" });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogle() {
+    setError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/console" },
+    });
+    if (error) setError(error.message);
   }
 
   return (
@@ -161,7 +191,7 @@ function AuthPage() {
           </div>
 
           <button
-            onClick={() => {/* TODO: connect to Supabase — supabase.auth.signInWithOAuth({ provider: 'google' }) */}}
+            onClick={handleGoogle}
             className="w-full label-mono border border-border text-text-primary py-3.5 hover:border-accent hover:text-accent transition-colors"
           >
             ACCESS VIA GOOGLE

@@ -62,7 +62,7 @@ function ProfilePage() {
           <div className="mt-10 border-l-2 border-warning bg-bg-surface p-5">
             <span className="label-mono text-warning">// ADMIN PRIVILEGE DETECTED</span>
             <p className="text-text-secondary text-sm mt-2">You have control panel access.</p>
-            <Link to="/admin" className="inline-block label-mono border border-warning text-warning px-4 py-2 mt-4 hover:bg-warning hover:text-bg-primary transition-colors">
+            <Link to="/admin" className="inline-block label-mono border border-warning text-warning px-4 py-2 mt-4 hover:bg-warning hover:text-white transition-colors">
               OPEN CONTROL PANEL →
             </Link>
           </div>
@@ -74,7 +74,7 @@ function ProfilePage() {
           <p className="text-text-secondary text-sm mt-2">Ending session terminates your authenticated state.</p>
           <button
             onClick={endSession}
-            className="label-mono border border-danger text-danger px-5 py-2.5 mt-4 hover:bg-danger hover:text-bg-primary transition-colors"
+            className="label-mono border border-danger text-danger px-5 py-2.5 mt-4 hover:bg-danger hover:text-white transition-colors"
           >
             END SESSION →
           </button>

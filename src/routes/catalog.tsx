@@ -78,14 +78,14 @@ function CatalogPage() {
                   <Link
                     to="/course/$courseCode"
                     params={{ courseCode: m.code }}
-                    className="block label-mono text-center bg-bg-surface text-accent border border-accent py-2.5 hover:bg-accent hover:text-bg-primary transition-colors"
+                    className="block label-mono text-center bg-bg-surface text-accent border border-accent py-2.5 hover:bg-accent hover:text-white transition-colors"
                   >
                     OPEN MODULE →
                   </Link>
                 ) : (
                   <button
                     onClick={() => {/* TODO: connect to Supabase — insert into enrollments */}}
-                    className="block w-full label-mono bg-accent text-bg-primary py-2.5 font-bold hover:bg-accent-dim transition-colors"
+                    className="block w-full label-mono bg-accent text-white py-2.5 font-bold hover:bg-accent-dim transition-colors"
                   >
                     DEPLOY MODULE →
                   </button>
@@ -118,7 +118,7 @@ function FilterGroup({ label, options, value, onChange }: { label: string; optio
             key={o}
             onClick={() => onChange(o)}
             className={`label-mono px-3 py-1.5 transition-colors ${
-              value === o ? "bg-accent text-bg-primary" : "bg-bg-surface text-text-secondary hover:text-text-primary"
+              value === o ? "bg-accent text-white" : "bg-bg-surface text-text-secondary hover:text-text-primary"
             }`}
           >
             {o}

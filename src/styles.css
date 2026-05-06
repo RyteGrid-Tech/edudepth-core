@@ -44,7 +44,7 @@
     font-family: system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  ::selection { background: var(--accent); color: var(--bg-primary); }
+  ::selection { background: var(--accent); color: #fff; }
 }
 
 @layer utilities {

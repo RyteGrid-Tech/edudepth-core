@@ -70,7 +70,7 @@ function LessonPage() {
             {!cleared ? (
               <button
                 onClick={clearLesson}
-                className="label-mono bg-accent text-bg-primary px-6 py-3 font-bold hover:bg-accent-dim transition-colors"
+                className="label-mono bg-accent text-white px-6 py-3 font-bold hover:bg-accent-dim transition-colors"
               >
                 CLEAR LESSON ✓
               </button>
@@ -78,7 +78,7 @@ function LessonPage() {
               <Link
                 to="/assessment/$quizId"
                 params={{ quizId: "q1" }}
-                className="label-mono bg-accent text-bg-primary px-6 py-3 font-bold hover:bg-accent-dim transition-colors"
+                className="label-mono bg-accent text-white px-6 py-3 font-bold hover:bg-accent-dim transition-colors"
               >
                 RUN ASSESSMENT →
               </Link>

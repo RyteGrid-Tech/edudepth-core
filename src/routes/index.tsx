@@ -51,7 +51,7 @@ function HomePage() {
         <div className="flex flex-col sm:flex-row gap-3 mt-8">
           <Link
             to="/auth"
-            className="label-mono bg-accent text-bg-primary px-6 py-3.5 font-bold hover:bg-accent-dim transition-colors text-center"
+            className="label-mono bg-accent text-white px-6 py-3.5 font-bold hover:bg-accent-dim transition-colors text-center"
           >
             INITIALIZE ACCOUNT →
           </Link>
@@ -158,7 +158,7 @@ function HomePage() {
         <p className="text-text-secondary mt-4 max-w-xl mx-auto">Initialize your account. Deploy your first module. Start operating.</p>
         <Link
           to="/auth"
-          className="inline-block label-mono bg-accent text-bg-primary px-8 py-4 font-bold hover:bg-accent-dim transition-colors mt-8"
+          className="inline-block label-mono bg-accent text-white px-8 py-4 font-bold hover:bg-accent-dim transition-colors mt-8"
         >
           INITIALIZE ACCOUNT →
         </Link>

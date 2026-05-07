@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { RequireAuth } from "@/components/RequireAuth";
 import {
@@ -36,6 +37,7 @@ import {
   Trash2,
   Eye,
   EyeOff,
+  Plus,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -62,7 +64,6 @@ type SectionId = (typeof SECTIONS)[number]["id"];
 
 function AdminPage() {
   const [section, setSection] = useState<SectionId>("OVERVIEW");
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [metrics, setMetrics] = useState({
@@ -86,7 +87,14 @@ function AdminPage() {
     notes: "",
     position: "1",
   });
-  const [quiz, setQuiz] = useState({ lessonId: "", title: "", json: "" });
+
+  // Dual-mode Quiz state
+  const [quizMode, setQuizMode] = useState<"FORM" | "JSON">("FORM");
+  const [quizMeta, setQuizMeta] = useState({ lessonId: "", title: "" });
+  const [quizQuestions, setQuizQuestions] = useState([
+    { q: "", options: ["", "", "", ""], correct: 0 },
+  ]);
+  const [quizJson, setQuizJson] = useState("");
 
   useEffect(() => {
     if (section === "REGISTRY") fetchProfiles();
@@ -131,18 +139,13 @@ function AdminPage() {
     }
   }
 
-  function flash(ok: boolean, text: string) {
-    setMsg({ ok, text });
-    setTimeout(() => setMsg(null), 4500);
-  }
-
   async function handleToggleAdmin(pid: string, current: boolean) {
     try {
       await toggleAdmin(pid, !current);
       setProfiles(profiles.map((p) => (p.id === pid ? { ...p, is_admin: !current } : p)));
-      flash(true, "Privileges updated.");
+      toast.success("Privileges updated.");
     } catch (err) {
-      flash(false, "Failed to update role.");
+      toast.error("Failed to update role.");
     }
   }
 
@@ -150,9 +153,9 @@ function AdminPage() {
     try {
       await updateCourse(cid, { is_published: !current });
       setAllCourses(allCourses.map((c) => (c.id === cid ? { ...c, is_published: !current } : c)));
-      flash(true, "Publication status updated.");
+      toast.success("Publication status updated.");
     } catch (err) {
-      flash(false, "Failed to update status.");
+      toast.error("Failed to update status.");
     }
   }
 
@@ -161,9 +164,9 @@ function AdminPage() {
     try {
       await deleteCourse(cid);
       setAllCourses(allCourses.filter((c) => c.id !== cid));
-      flash(true, "Course purged from system.");
+      toast.success("Course purged from system.");
     } catch (err) {
-      flash(false, "Deletion failed.");
+      toast.error("Deletion failed.");
     }
   }
 
@@ -203,10 +206,10 @@ function AdminPage() {
         };
         if (editId) {
           await updateCourse(editId, payload);
-          flash(true, `Course ${course.code} updated.`);
+          toast.success(`Course ${course.code} updated.`);
         } else {
           await createCourse(payload);
-          flash(true, `Course ${course.code} deployed.`);
+          toast.success(`Course ${course.code} deployed.`);
         }
         setCourse({ code: "", title: "", description: "", levels: "SS3" });
         setEditId(null);
@@ -221,7 +224,7 @@ function AdminPage() {
           title: mod.title.trim(),
           position: Number(mod.position) || 1,
         });
-        flash(true, "Module deployed.");
+        toast.success("Module deployed.");
         setMod({ courseCode: "", title: "", position: "1" });
       } else if (section === "LESSON") {
         if (!lesson.moduleId.trim() || !lesson.title.trim()) {
@@ -234,48 +237,75 @@ function AdminPage() {
           notes_text: lesson.notes,
           position: Number(lesson.position) || 1,
         });
-        flash(true, "Lesson registered.");
+        toast.success("Lesson registered.");
         setLesson({ moduleId: "", title: "", video: "", notes: "", position: "1" });
       } else if (section === "ASSESSMENT") {
-        if (!quiz.lessonId.trim() || !quiz.json.trim()) {
-          throw new Error("Lesson ID and questions JSON are required.");
-        }
-        let parsed;
-        try {
-          parsed = JSON.parse(quiz.json);
-        } catch (e) {
-          throw new Error("Invalid JSON format in questions field.");
+        if (!quizMeta.lessonId.trim()) {
+          throw new Error("Lesson ID is required.");
         }
 
-        if (!Array.isArray(parsed)) {
-          throw new Error("Questions JSON must be an array.");
-        }
+        let questionsData = [];
 
-        const questions = parsed.map((q, idx) => {
-          if (!q.q || !q.options || !Array.isArray(q.options) || q.options.length < 4) {
-            throw new Error(`Question at index ${idx} is missing required fields or has invalid options.`);
+        if (quizMode === "FORM") {
+          questionsData = quizQuestions.map((q, idx) => {
+            if (!q.q.trim() || q.options.some((o) => !o.trim())) {
+              throw new Error(`Question ${idx + 1} has empty fields.`);
+            }
+            return {
+              question_text: q.q.trim(),
+              option_a: q.options[0].trim(),
+              option_b: q.options[1].trim(),
+              option_c: q.options[2].trim(),
+              option_d: q.options[3].trim(),
+              correct_option: (["a", "b", "c", "d"] as const)[q.correct],
+            };
+          });
+        } else {
+          if (!quizJson.trim()) {
+            throw new Error("Questions JSON is required.");
           }
-          return {
-            question_text: q.q,
-            option_a: q.options[0],
-            option_b: q.options[1],
-            option_c: q.options[2],
-            option_d: q.options[3],
-            correct_option: (["a", "b", "c", "d"] as const)[q.correct] || "a",
-          };
-        });
+          let parsed;
+          try {
+            parsed = JSON.parse(quizJson);
+          } catch (e) {
+            throw new Error("Invalid JSON format.");
+          }
+          if (!Array.isArray(parsed)) {
+            throw new Error("JSON must be an array.");
+          }
+          questionsData = parsed.map((q, idx) => {
+            if (!q.q || !q.options || !Array.isArray(q.options) || q.options.length < 4) {
+              throw new Error(`Question at index ${idx} is malformed.`);
+            }
+            return {
+              question_text: q.q,
+              option_a: q.options[0],
+              option_b: q.options[1],
+              option_c: q.options[2],
+              option_d: q.options[3],
+              correct_option: (["a", "b", "c", "d"] as const)[q.correct] || "a",
+            };
+          });
+        }
+
+        if (questionsData.length === 0) {
+          throw new Error("No questions provided.");
+        }
 
         await createQuizWithQuestions(
-          quiz.lessonId.trim(),
-          quiz.title.trim() || "Assessment",
-          questions,
+          quizMeta.lessonId.trim(),
+          quizMeta.title.trim() || "Assessment",
+          questionsData,
         );
-        flash(true, `Assessment with ${questions.length} questions created.`);
-        setQuiz({ lessonId: "", title: "", json: "" });
+        toast.success(`Assessment with ${questionsData.length} questions created.`);
+        setQuizMeta({ lessonId: "", title: "" });
+        setQuizQuestions([{ q: "", options: ["", "", "", ""], correct: 0 }]);
+        setQuizJson("");
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Admin operation failed:", err);
-      flash(false, err?.message || "Operation failed.");
+      toast.error(err?.message || "Operation failed.");
     } finally {
       setBusy(false);
     }
@@ -316,7 +346,6 @@ function AdminPage() {
                     key={s.id}
                     onClick={() => {
                       setSection(s.id);
-                      setMsg(null);
                       setSidebarOpen(false);
                       if (s.id !== "COURSE") setEditId(null);
                     }}
@@ -376,16 +405,6 @@ function AdminPage() {
                 ROOT ACCESS
               </span>
             </div>
-
-            {msg && (
-              <div
-                className={`border-l-2 ${msg.ok ? "border-success" : "border-danger"} bg-bg-surface p-4 mb-8`}
-              >
-                <p className={`font-mono text-sm ${msg.ok ? "text-success" : "text-danger"}`}>
-                  ● {msg.text}
-                </p>
-              </div>
-            )}
 
             <div className="mt-px">
               {section === "OVERVIEW" && (
@@ -688,28 +707,141 @@ function AdminPage() {
                       </>
                     )}
                     {section === "ASSESSMENT" && (
-                      <>
+                      <div className="space-y-px">
                         <Field
                           label="PARENT LESSON ID (uuid)"
-                          value={quiz.lessonId}
-                          onChange={(v) => setQuiz({ ...quiz, lessonId: v })}
+                          value={quizMeta.lessonId}
+                          onChange={(v) => setQuizMeta({ ...quizMeta, lessonId: v })}
                           placeholder="uuid..."
                           mono
                         />
                         <Field
                           label="QUIZ TITLE"
-                          value={quiz.title}
-                          onChange={(v) => setQuiz({ ...quiz, title: v })}
+                          value={quizMeta.title}
+                          onChange={(v) => setQuizMeta({ ...quizMeta, title: v })}
                           placeholder="Quadratic Equations"
                         />
-                        <TextArea
-                          label='QUESTIONS (JSON: [{"q":"...","options":["A","B","C","D"],"correct":0}])'
-                          value={quiz.json}
-                          onChange={(v) => setQuiz({ ...quiz, json: v })}
-                          placeholder='[{"q":"2+2","options":["3","4","5","6"],"correct":1}]'
-                          mono
-                        />
-                      </>
+
+                        <div className="bg-bg-card p-4 flex items-center gap-4 border-b border-border">
+                          <span className="label-mono text-text-muted text-[10px]">INPUT MODE</span>
+                          <div className="flex bg-bg-surface p-0.5 rounded border border-border">
+                            <button
+                              type="button"
+                              onClick={() => setQuizMode("FORM")}
+                              className={`px-3 py-1 label-mono text-[9px] transition-colors ${quizMode === "FORM" ? "bg-accent text-white" : "text-text-muted hover:text-text-primary"}`}
+                            >
+                              DYNAMIC FORM
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuizMode("JSON")}
+                              className={`px-3 py-1 label-mono text-[9px] transition-colors ${quizMode === "JSON" ? "bg-accent text-white" : "text-text-muted hover:text-text-primary"}`}
+                            >
+                              BULK JSON
+                            </button>
+                          </div>
+                        </div>
+
+                        {quizMode === "FORM" ? (
+                          <div className="space-y-px">
+                            {quizQuestions.map((q, idx) => (
+                              <div key={idx} className="bg-bg-surface p-4 border-b border-border">
+                                <div className="flex items-center justify-between mb-4">
+                                  <span className="label-mono text-accent text-[10px]">
+                                    QUESTION {String(idx + 1).padStart(2, "0")}
+                                  </span>
+                                  {quizQuestions.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setQuizQuestions(quizQuestions.filter((_, i) => i !== idx))
+                                      }
+                                      className="label-mono text-[9px] text-danger hover:underline"
+                                    >
+                                      REMOVE
+                                    </button>
+                                  )}
+                                </div>
+                                <div className="space-y-3">
+                                  <input
+                                    required
+                                    placeholder="Question text..."
+                                    value={q.q}
+                                    onChange={(e) => {
+                                      const next = [...quizQuestions];
+                                      next[idx].q = e.target.value;
+                                      setQuizQuestions(next);
+                                    }}
+                                    className="w-full bg-bg-card px-3 py-2 text-sm text-text-primary outline-none border border-border focus:border-accent"
+                                  />
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    {["A", "B", "C", "D"].map((opt, optIdx) => (
+                                      <div key={opt} className="flex items-center gap-2">
+                                        <span className="label-mono text-[10px] text-text-muted w-4">
+                                          {opt}
+                                        </span>
+                                        <input
+                                          required
+                                          placeholder={`Option ${opt}...`}
+                                          value={q.options[optIdx]}
+                                          onChange={(e) => {
+                                            const next = [...quizQuestions];
+                                            next[idx].options[optIdx] = e.target.value;
+                                            setQuizQuestions(next);
+                                          }}
+                                          className="flex-1 bg-bg-card px-3 py-1.5 text-xs text-text-primary outline-none border border-border focus:border-accent"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <div className="flex items-center gap-3 pt-2">
+                                    <span className="label-mono text-[10px] text-text-muted">
+                                      CORRECT OPTION
+                                    </span>
+                                    <select
+                                      value={q.correct}
+                                      onChange={(e) => {
+                                        const next = [...quizQuestions];
+                                        next[idx].correct = Number(e.target.value);
+                                        setQuizQuestions(next);
+                                      }}
+                                      className="bg-bg-card text-xs text-text-primary px-2 py-1 outline-none border border-border focus:border-accent"
+                                    >
+                                      <option value={0}>OPTION A</option>
+                                      <option value={1}>OPTION B</option>
+                                      <option value={2}>OPTION C</option>
+                                      <option value={3}>OPTION D</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setQuizQuestions([
+                                  ...quizQuestions,
+                                  { q: "", options: ["", "", "", ""], correct: 0 },
+                                ])
+                              }
+                              className="w-full flex items-center justify-center gap-2 py-3 bg-bg-card hover:bg-bg-surface transition-colors border-t border-border"
+                            >
+                              <Plus className="h-3.5 w-3.5 text-accent" />
+                              <span className="label-mono text-[9px] text-accent">
+                                ADD ANOTHER QUESTION
+                              </span>
+                            </button>
+                          </div>
+                        ) : (
+                          <TextArea
+                            label='QUESTIONS (JSON: [{"q":"...","options":["A","B","C","D"],"correct":0}])'
+                            value={quizJson}
+                            onChange={(v) => setQuizJson(v)}
+                            placeholder='[{"q":"2+2","options":["3","4","5","6"],"correct":1}]'
+                            mono
+                          />
+                        )}
+                      </div>
                     )}
                     <button
                       type="submit"

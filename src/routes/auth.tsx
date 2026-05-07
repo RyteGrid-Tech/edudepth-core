@@ -67,7 +67,7 @@ function AuthPage() {
       {/* minimal header */}
       <header className="px-5 md:px-8 py-5 border-b border-border flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="EduDepth" className="h-7 w-7 object-contain bg-text-primary p-0.5" />
+          <img src={logo} alt="EduDepth" className="h-7 w-7 object-contain" />
           <span className="text-sm font-bold tracking-wider">EDUDEPTH</span>
         </Link>
         <Link to="/" className="label-mono text-text-muted hover:text-accent transition-colors">

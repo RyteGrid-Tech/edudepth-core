@@ -62,9 +62,13 @@ function CatalogPage() {
   return (
     <AppShell>
       <div className="px-5 md:px-8 py-8 max-w-6xl mx-auto">
-        <p className="font-mono text-xs text-text-muted">edudepth@catalog:~$ <span className="text-accent">ls --modules</span></p>
+        <p className="font-mono text-xs text-text-muted">
+          edudepth@catalog:~$ <span className="text-accent">ls --modules</span>
+        </p>
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">Module Catalog</h1>
-        <p className="text-text-secondary mt-1">Deploy modules to your operation. Filter by level or status.</p>
+        <p className="text-text-secondary mt-1">
+          Deploy modules to your operation. Filter by level or status.
+        </p>
 
         <div className="mt-8 border border-border bg-bg-surface">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
@@ -89,22 +93,31 @@ function CatalogPage() {
         {filtered.length === 0 ? (
           <div className="border-l-2 border-warning bg-bg-surface p-6 mt-4">
             <p className="label-mono text-warning mb-1">EMPTY RESULT</p>
-            <p className="text-sm text-text-secondary">No modules match your filters. Reset and retry.</p>
+            <p className="text-sm text-text-secondary">
+              No modules match your filters. Reset and retry.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border mt-4">
             {filtered.map((m) => {
               const isEnrolled = enrolledIds.includes(m.id);
               return (
-                <div key={m.code} className="bg-bg-card p-5 group hover:bg-bg-surface transition-colors border-l-2 border-transparent hover:border-accent">
+                <div
+                  key={m.code}
+                  className="bg-bg-card p-5 group hover:bg-bg-surface transition-colors border-l-2 border-transparent hover:border-accent"
+                >
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-mono text-xs text-accent">{m.code}</span>
                     {m.class_levels?.[0] && (
-                      <span className="label-mono text-text-muted border border-border px-2 py-0.5">{m.class_levels[0]}</span>
+                      <span className="label-mono text-text-muted border border-border px-2 py-0.5">
+                        {m.class_levels[0]}
+                      </span>
                     )}
                   </div>
                   <h3 className="text-lg font-bold">{m.title}</h3>
-                  <p className="font-mono text-[11px] text-text-muted mt-2 mb-4 line-clamp-3">{m.description}</p>
+                  <p className="font-mono text-[11px] text-text-muted mt-2 mb-4 line-clamp-3">
+                    {m.description}
+                  </p>
                   {isEnrolled ? (
                     <Link
                       to="/course/$courseCode"
@@ -132,7 +145,17 @@ function CatalogPage() {
   );
 }
 
-function FilterGroup({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
+function FilterGroup({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <div className="bg-bg-card p-3">
       <p className="label-mono text-text-muted mb-2">{label}</p>
@@ -142,7 +165,9 @@ function FilterGroup({ label, options, value, onChange }: { label: string; optio
             key={o}
             onClick={() => onChange(o)}
             className={`label-mono px-3 py-1.5 transition-colors ${
-              value === o ? "bg-accent text-white" : "bg-bg-surface text-text-secondary hover:text-text-primary"
+              value === o
+                ? "bg-accent text-white"
+                : "bg-bg-surface text-text-secondary hover:text-text-primary"
             }`}
           >
             {o}

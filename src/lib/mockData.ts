@@ -8,39 +8,116 @@ export const MOCK_USER = {
 };
 
 export const MOCK_MODULES = [
-  { code: "MTH101", title: "Mathematics", level: "SS3", lessons: 142, quizzes: 18, modules: 9, enrolled: true, progress: 64, students: 4231 },
-  { code: "PHY101", title: "Physics", level: "SS3", lessons: 118, quizzes: 14, modules: 8, enrolled: true, progress: 42, students: 3104 },
-  { code: "CHM101", title: "Chemistry", level: "SS3", lessons: 124, quizzes: 16, modules: 8, enrolled: true, progress: 28, students: 2987 },
-  { code: "ENG101", title: "English Language", level: "SS3", lessons: 98, quizzes: 12, modules: 7, enrolled: false, progress: 0, students: 5612 },
-  { code: "BIO101", title: "Biology", level: "SS2", lessons: 136, quizzes: 17, modules: 10, enrolled: false, progress: 0, students: 3845 },
-  { code: "ECN101", title: "Economics", level: "SS2", lessons: 86, quizzes: 10, modules: 6, enrolled: false, progress: 0, students: 2143 },
-  { code: "GOV101", title: "Government", level: "SS2", lessons: 72, quizzes: 9, modules: 6, enrolled: false, progress: 0, students: 1876 },
+  {
+    code: "MTH101",
+    title: "Mathematics",
+    level: "SS3",
+    lessons: 142,
+    quizzes: 18,
+    modules: 9,
+    enrolled: true,
+    progress: 64,
+    students: 4231,
+  },
+  {
+    code: "PHY101",
+    title: "Physics",
+    level: "SS3",
+    lessons: 118,
+    quizzes: 14,
+    modules: 8,
+    enrolled: true,
+    progress: 42,
+    students: 3104,
+  },
+  {
+    code: "CHM101",
+    title: "Chemistry",
+    level: "SS3",
+    lessons: 124,
+    quizzes: 16,
+    modules: 8,
+    enrolled: true,
+    progress: 28,
+    students: 2987,
+  },
+  {
+    code: "ENG101",
+    title: "English Language",
+    level: "SS3",
+    lessons: 98,
+    quizzes: 12,
+    modules: 7,
+    enrolled: false,
+    progress: 0,
+    students: 5612,
+  },
+  {
+    code: "BIO101",
+    title: "Biology",
+    level: "SS2",
+    lessons: 136,
+    quizzes: 17,
+    modules: 10,
+    enrolled: false,
+    progress: 0,
+    students: 3845,
+  },
+  {
+    code: "ECN101",
+    title: "Economics",
+    level: "SS2",
+    lessons: 86,
+    quizzes: 10,
+    modules: 6,
+    enrolled: false,
+    progress: 0,
+    students: 2143,
+  },
+  {
+    code: "GOV101",
+    title: "Government",
+    level: "SS2",
+    lessons: 72,
+    quizzes: 9,
+    modules: 6,
+    enrolled: false,
+    progress: 0,
+    students: 1876,
+  },
 ];
 
 export const MOCK_COURSE = {
   code: "MTH101",
   title: "Mathematics",
   level: "SS3",
-  description: "Complete WAEC and JAMB-aligned mathematics syllabus. Algebra, geometry, calculus and statistics — sequenced for cumulative mastery.",
+  description:
+    "Complete WAEC and JAMB-aligned mathematics syllabus. Algebra, geometry, calculus and statistics — sequenced for cumulative mastery.",
   enrolled: 4231,
   progress: 64,
   modules: [
     {
-      id: "m1", title: "Number & Numeration", lessons: [
+      id: "m1",
+      title: "Number & Numeration",
+      lessons: [
         { id: "l1", title: "Number Bases", duration: "12:04", status: "CLEARED" },
         { id: "l2", title: "Modular Arithmetic", duration: "09:48", status: "CLEARED" },
         { id: "l3", title: "Indices & Logarithms", duration: "18:22", status: "IN PROGRESS" },
       ],
     },
     {
-      id: "m2", title: "Algebraic Processes", lessons: [
+      id: "m2",
+      title: "Algebraic Processes",
+      lessons: [
         { id: "l4", title: "Quadratic Equations", duration: "22:16", status: "—" },
         { id: "l5", title: "Simultaneous Equations", duration: "15:44", status: "—", locked: true },
         { id: "l6", title: "Inequalities", duration: "11:30", status: "—", locked: true },
       ],
     },
     {
-      id: "m3", title: "Geometry & Trigonometry", lessons: [
+      id: "m3",
+      title: "Geometry & Trigonometry",
+      lessons: [
         { id: "l7", title: "Plane Geometry", duration: "19:00", status: "—", locked: true },
         { id: "l8", title: "Trigonometric Ratios", duration: "16:12", status: "—", locked: true },
       ],

@@ -20,13 +20,13 @@ import {
   type QuizResult,
 } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Library, 
-  BookOpen, 
-  Layers, 
-  GraduationCap, 
+import {
+  LayoutDashboard,
+  Users,
+  Library,
+  BookOpen,
+  Layers,
+  GraduationCap,
   FileText,
   ChevronRight,
   Menu,
@@ -35,7 +35,7 @@ import {
   Edit2,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -58,14 +58,19 @@ const SECTIONS = [
   { id: "ASSESSMENT", label: "Deploy Quiz", icon: FileText },
 ] as const;
 
-type SectionId = typeof SECTIONS[number]["id"];
+type SectionId = (typeof SECTIONS)[number]["id"];
 
 function AdminPage() {
   const [section, setSection] = useState<SectionId>("OVERVIEW");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [metrics, setMetrics] = useState({ totalUsers: 0, totalCourses: 0, totalEnrollments: 0, lessonsCompleted: 0 });
+  const [metrics, setMetrics] = useState({
+    totalUsers: 0,
+    totalCourses: 0,
+    totalEnrollments: 0,
+    lessonsCompleted: 0,
+  });
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [attempts, setAttempts] = useState<QuizResult[]>([]);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -74,7 +79,13 @@ function AdminPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [course, setCourse] = useState({ code: "", title: "", description: "", levels: "SS3" });
   const [mod, setMod] = useState({ courseCode: "", title: "", position: "1" });
-  const [lesson, setLesson] = useState({ moduleId: "", title: "", video: "", notes: "", position: "1" });
+  const [lesson, setLesson] = useState({
+    moduleId: "",
+    title: "",
+    video: "",
+    notes: "",
+    position: "1",
+  });
   const [quiz, setQuiz] = useState({ lessonId: "", title: "", json: "" });
 
   useEffect(() => {
@@ -176,13 +187,16 @@ function AdminPage() {
           code: course.code.trim(),
           title: course.title.trim(),
           description: course.description.trim(),
-          class_levels: course.levels.split(",").map((s) => s.trim()).filter(Boolean),
+          class_levels: course.levels
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
         };
         if (editId) {
           await updateCourse(editId, payload);
           flash(true, `Course ${course.code} updated.`);
         } else {
-          await createCourse({ ...payload, is_published: true });
+          await createCourse(payload);
           flash(true, `Course ${course.code} deployed.`);
         }
         setCourse({ code: "", title: "", description: "", levels: "SS3" });
@@ -190,7 +204,11 @@ function AdminPage() {
       } else if (section === "MODULE") {
         const courseId = await getCourseIdByCode(mod.courseCode.trim());
         if (!courseId) throw new Error("Parent course not found.");
-        await createModule({ course_id: courseId, title: mod.title.trim(), position: Number(mod.position) });
+        await createModule({
+          course_id: courseId,
+          title: mod.title.trim(),
+          position: Number(mod.position),
+        });
         flash(true, "Module deployed.");
         setMod({ courseCode: "", title: "", position: "1" });
       } else if (section === "LESSON") {
@@ -217,7 +235,11 @@ function AdminPage() {
           option_d: q.options[3],
           correct_option: (["a", "b", "c", "d"] as const)[q.correct],
         }));
-        await createQuizWithQuestions(quiz.lessonId.trim(), quiz.title.trim() || "Assessment", questions);
+        await createQuizWithQuestions(
+          quiz.lessonId.trim(),
+          quiz.title.trim() || "Assessment",
+          questions,
+        );
         flash(true, `Assessment with ${questions.length} questions created.`);
         setQuiz({ lessonId: "", title: "", json: "" });
       }
@@ -233,17 +255,19 @@ function AdminPage() {
       <div className="flex min-h-screen bg-bg-primary">
         {/* Sidebar Overlay (Mobile) */}
         {isSidebarOpen && (
-          <div 
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden" 
+          <div
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar */}
-        <aside className={`
+        <aside
+          className={`
           fixed inset-y-0 left-0 z-50 w-64 bg-bg-card border-r border-border transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        `}>
+        `}
+        >
           <div className="flex flex-col h-full">
             <div className="p-6 border-b border-border flex items-center justify-between">
               <span className="label-mono text-accent">COMMAND MENU</span>
@@ -251,7 +275,7 @@ function AdminPage() {
                 <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
-            
+
             <nav className="flex-1 overflow-y-auto py-4">
               {SECTIONS.map((s) => {
                 const Icon = s.icon;
@@ -267,9 +291,10 @@ function AdminPage() {
                     }}
                     className={`
                       w-full flex items-center gap-3 px-6 py-3.5 label-mono text-[10px] transition-colors
-                      ${isActive 
-                        ? "text-accent bg-bg-surface border-l-2 border-accent" 
-                        : "text-text-muted hover:text-text-primary hover:bg-bg-surface/50"
+                      ${
+                        isActive
+                          ? "text-accent bg-bg-surface border-l-2 border-accent"
+                          : "text-text-muted hover:text-text-primary hover:bg-bg-surface/50"
                       }
                     `}
                   >
@@ -283,7 +308,8 @@ function AdminPage() {
 
             <div className="p-6 border-t border-border mt-auto">
               <p className="font-mono text-[9px] text-text-muted leading-tight uppercase">
-                RYTEGRID SYSTEM v1.0.5<br />
+                RYTEGRID SYSTEM v1.0.5
+                <br />
                 AUTHORIZED ACCESS ONLY
               </p>
             </div>
@@ -295,27 +321,38 @@ function AdminPage() {
           <div className="px-5 md:px-8 py-8 max-w-6xl mx-auto">
             {/* Mobile Header Toggle */}
             <div className="flex items-center justify-between mb-6 lg:hidden">
-              <button 
+              <button
                 onClick={() => setSidebarOpen(true)}
                 className="flex items-center gap-2 label-mono text-accent bg-bg-surface px-3 py-2 border border-border"
               >
                 <Menu className="h-4 w-4" />
                 <span>MENU</span>
               </button>
-              <span className="label-mono text-[10px] text-warning border border-warning px-2 py-1">ROOT</span>
+              <span className="label-mono text-[10px] text-warning border border-warning px-2 py-1">
+                ROOT
+              </span>
             </div>
 
-            <p className="font-mono text-xs text-text-muted">edudepth@admin:~$ <span className="text-accent">sudo {section.toLowerCase()}</span></p>
+            <p className="font-mono text-xs text-text-muted">
+              edudepth@admin:~$ <span className="text-accent">sudo {section.toLowerCase()}</span>
+            </p>
             <div className="flex items-center justify-between flex-wrap gap-3 mt-2 mb-8">
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                {SECTIONS.find(s => s.id === section)?.label} {editId && section === "COURSE" && "(Editing)"}
+                {SECTIONS.find((s) => s.id === section)?.label}{" "}
+                {editId && section === "COURSE" && "(Editing)"}
               </h1>
-              <span className="hidden lg:inline label-mono border border-warning text-warning px-3 py-1.5">ROOT ACCESS</span>
+              <span className="hidden lg:inline label-mono border border-warning text-warning px-3 py-1.5">
+                ROOT ACCESS
+              </span>
             </div>
 
             {msg && (
-              <div className={`border-l-2 ${msg.ok ? "border-success" : "border-danger"} bg-bg-surface p-4 mb-8`}>
-                <p className={`font-mono text-sm ${msg.ok ? "text-success" : "text-danger"}`}>● {msg.text}</p>
+              <div
+                className={`border-l-2 ${msg.ok ? "border-success" : "border-danger"} bg-bg-surface p-4 mb-8`}
+              >
+                <p className={`font-mono text-sm ${msg.ok ? "text-success" : "text-danger"}`}>
+                  ● {msg.text}
+                </p>
               </div>
             )}
 
@@ -336,7 +373,9 @@ function AdminPage() {
                       <thead>
                         <tr className="border-b border-border bg-bg-surface">
                           <th className="label-mono p-4 text-text-muted">OPERATOR</th>
-                          <th className="label-mono p-4 text-text-muted hidden md:table-cell">EMAIL</th>
+                          <th className="label-mono p-4 text-text-muted hidden md:table-cell">
+                            EMAIL
+                          </th>
                           <th className="label-mono p-4 text-text-muted">LEVEL</th>
                           <th className="label-mono p-4 text-text-muted">ROLE</th>
                           <th className="label-mono p-4 text-text-muted text-right">ACTION</th>
@@ -344,15 +383,26 @@ function AdminPage() {
                       </thead>
                       <tbody>
                         {profiles.map((p) => (
-                          <tr key={p.id} className="border-b border-border hover:bg-bg-surface/50 transition-colors">
+                          <tr
+                            key={p.id}
+                            className="border-b border-border hover:bg-bg-surface/50 transition-colors"
+                          >
                             <td className="p-4">
                               <p className="font-bold text-sm text-text-primary">{p.full_name}</p>
-                              <p className="font-mono text-[10px] text-text-muted md:hidden">{p.email}</p>
+                              <p className="font-mono text-[10px] text-text-muted md:hidden">
+                                {p.email}
+                              </p>
                             </td>
-                            <td className="p-4 font-mono text-xs text-text-secondary hidden md:table-cell">{p.email}</td>
-                            <td className="p-4 font-mono text-xs text-text-primary">{p.class_level || "—"}</td>
+                            <td className="p-4 font-mono text-xs text-text-secondary hidden md:table-cell">
+                              {p.email}
+                            </td>
+                            <td className="p-4 font-mono text-xs text-text-primary">
+                              {p.class_level || "—"}
+                            </td>
                             <td className="p-4">
-                              <span className={`label-mono text-[9px] px-2 py-0.5 border ${p.is_admin ? "border-warning text-warning" : "border-border text-text-muted"}`}>
+                              <span
+                                className={`label-mono text-[9px] px-2 py-0.5 border ${p.is_admin ? "border-warning text-warning" : "border-border text-text-muted"}`}
+                              >
                                 {p.is_admin ? "ADMIN" : "STUDENT"}
                               </span>
                             </td>
@@ -386,28 +436,48 @@ function AdminPage() {
                       </thead>
                       <tbody>
                         {attempts.map((a) => (
-                          <tr key={a.id} className="border-b border-border hover:bg-bg-surface/50 transition-colors">
+                          <tr
+                            key={a.id}
+                            className="border-b border-border hover:bg-bg-surface/50 transition-colors"
+                          >
                             <td className="p-4">
-                              <p className="font-bold text-sm text-text-primary">{a.profiles?.full_name}</p>
-                              <p className="font-mono text-[9px] text-text-muted">{a.profiles?.email}</p>
+                              <p className="font-bold text-sm text-text-primary">
+                                {a.profiles?.full_name}
+                              </p>
+                              <p className="font-mono text-[9px] text-text-muted">
+                                {a.profiles?.email}
+                              </p>
                             </td>
                             <td className="p-4">
-                              <p className="text-xs text-text-primary font-bold">{a.quizzes?.title || a.quizzes?.lessons?.title}</p>
-                              <p className="font-mono text-[9px] text-accent">{a.quizzes?.lessons?.modules?.courses?.code}</p>
+                              <p className="text-xs text-text-primary font-bold">
+                                {a.quizzes?.title || a.quizzes?.lessons?.title}
+                              </p>
+                              <p className="font-mono text-[9px] text-accent">
+                                {a.quizzes?.lessons?.modules?.courses?.code}
+                              </p>
                             </td>
                             <td className="p-4">
-                              <span className={`font-mono text-sm font-bold ${ (a.score/a.total) >= 0.7 ? "text-success" : "text-danger" }`}>
+                              <span
+                                className={`font-mono text-sm font-bold ${a.score / a.total >= 0.7 ? "text-success" : "text-danger"}`}
+                              >
                                 {a.score}/{a.total}
                               </span>
                             </td>
                             <td className="p-4 text-right font-mono text-[9px] text-text-muted uppercase">
-                              {new Date(a.submitted_at).toLocaleDateString()} {new Date(a.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {new Date(a.submitted_at).toLocaleDateString()}{" "}
+                              {new Date(a.submitted_at).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
                             </td>
                           </tr>
                         ))}
                         {attempts.length === 0 && (
                           <tr>
-                            <td colSpan={4} className="p-10 text-center font-mono text-xs text-text-muted">
+                            <td
+                              colSpan={4}
+                              className="p-10 text-center font-mono text-xs text-text-muted"
+                            >
                               NO ATTEMPTS RECORDED.
                             </td>
                           </tr>
@@ -432,14 +502,21 @@ function AdminPage() {
                       </thead>
                       <tbody>
                         {allCourses.map((c) => (
-                          <tr key={c.id} className="border-b border-border hover:bg-bg-surface/50 transition-colors">
+                          <tr
+                            key={c.id}
+                            className="border-b border-border hover:bg-bg-surface/50 transition-colors"
+                          >
                             <td className="p-4 font-mono text-xs text-accent">{c.code}</td>
                             <td className="p-4">
                               <p className="font-bold text-sm text-text-primary">{c.title}</p>
-                              <p className="font-mono text-[10px] text-text-muted hidden md:block">{c.description?.substring(0, 60)}...</p>
+                              <p className="font-mono text-[10px] text-text-muted hidden md:block">
+                                {c.description?.substring(0, 60)}...
+                              </p>
                             </td>
                             <td className="p-4">
-                              <span className={`label-mono text-[9px] px-2 py-0.5 border ${c.is_published ? "border-success text-success" : "border-warning text-warning"}`}>
+                              <span
+                                className={`label-mono text-[9px] px-2 py-0.5 border ${c.is_published ? "border-success text-success" : "border-warning text-warning"}`}
+                              >
                                 {c.is_published ? "PUBLISHED" : "DRAFT"}
                               </span>
                             </td>
@@ -457,7 +534,11 @@ function AdminPage() {
                                   className="text-text-muted hover:text-accent transition-colors"
                                   title={c.is_published ? "Unpublish" : "Publish"}
                                 >
-                                  {c.is_published ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                                  {c.is_published ? (
+                                    <EyeOff className="h-3.5 w-3.5" />
+                                  ) : (
+                                    <Eye className="h-3.5 w-3.5" />
+                                  )}
                                 </button>
                                 <button
                                   onClick={() => handleDeleteCourse(c.id)}
@@ -476,37 +557,118 @@ function AdminPage() {
                 </div>
               )}
 
-              {(section === "COURSE" || section === "MODULE" || section === "LESSON" || section === "ASSESSMENT") && (
+              {(section === "COURSE" ||
+                section === "MODULE" ||
+                section === "LESSON" ||
+                section === "ASSESSMENT") && (
                 <div className="max-w-3xl">
                   <form onSubmit={submit} className="space-y-px bg-border border border-border">
                     {section === "COURSE" && (
                       <>
-                        <Field label="COURSE CODE" value={course.code} onChange={(v) => setCourse({ ...course, code: v })} placeholder="MTH101" mono />
-                        <Field label="TITLE" value={course.title} onChange={(v) => setCourse({ ...course, title: v })} placeholder="Mathematics" />
-                        <Field label="CLASS LEVELS (comma-separated)" value={course.levels} onChange={(v) => setCourse({ ...course, levels: v })} placeholder="SS1,SS2,SS3" mono />
-                        <TextArea label="DESCRIPTION" value={course.description} onChange={(v) => setCourse({ ...course, description: v })} placeholder="Curriculum-aligned mathematics..." />
+                        <Field
+                          label="COURSE CODE"
+                          value={course.code}
+                          onChange={(v) => setCourse({ ...course, code: v })}
+                          placeholder="MTH101"
+                          mono
+                        />
+                        <Field
+                          label="TITLE"
+                          value={course.title}
+                          onChange={(v) => setCourse({ ...course, title: v })}
+                          placeholder="Mathematics"
+                        />
+                        <Field
+                          label="CLASS LEVELS (comma-separated)"
+                          value={course.levels}
+                          onChange={(v) => setCourse({ ...course, levels: v })}
+                          placeholder="SS1,SS2,SS3"
+                          mono
+                        />
+                        <TextArea
+                          label="DESCRIPTION"
+                          value={course.description}
+                          onChange={(v) => setCourse({ ...course, description: v })}
+                          placeholder="Curriculum-aligned mathematics..."
+                        />
                       </>
                     )}
                     {section === "MODULE" && (
                       <>
-                        <Field label="PARENT COURSE CODE" value={mod.courseCode} onChange={(v) => setMod({ ...mod, courseCode: v })} placeholder="MTH101" mono />
-                        <Field label="MODULE TITLE" value={mod.title} onChange={(v) => setMod({ ...mod, title: v })} placeholder="Algebraic Processes" />
-                        <Field label="ORDER INDEX" value={mod.position} onChange={(v) => setMod({ ...mod, position: v })} placeholder="2" mono />
+                        <Field
+                          label="PARENT COURSE CODE"
+                          value={mod.courseCode}
+                          onChange={(v) => setMod({ ...mod, courseCode: v })}
+                          placeholder="MTH101"
+                          mono
+                        />
+                        <Field
+                          label="MODULE TITLE"
+                          value={mod.title}
+                          onChange={(v) => setMod({ ...mod, title: v })}
+                          placeholder="Algebraic Processes"
+                        />
+                        <Field
+                          label="ORDER INDEX"
+                          value={mod.position}
+                          onChange={(v) => setMod({ ...mod, position: v })}
+                          placeholder="2"
+                          mono
+                        />
                       </>
                     )}
                     {section === "LESSON" && (
                       <>
-                        <Field label="PARENT MODULE ID (uuid)" value={lesson.moduleId} onChange={(v) => setLesson({ ...lesson, moduleId: v })} placeholder="uuid..." mono />
-                        <Field label="LESSON TITLE" value={lesson.title} onChange={(v) => setLesson({ ...lesson, title: v })} placeholder="Quadratic Equations" />
-                        <Field label="YOUTUBE URL" value={lesson.video} onChange={(v) => setLesson({ ...lesson, video: v })} placeholder="https://youtube.com/watch?v=..." mono />
-                        <Field label="POSITION" value={lesson.position} onChange={(v) => setLesson({ ...lesson, position: v })} placeholder="1" mono />
-                        <TextArea label="LESSON NOTES" value={lesson.notes} onChange={(v) => setLesson({ ...lesson, notes: v })} placeholder="Key concepts, formulas, examples..." />
+                        <Field
+                          label="PARENT MODULE ID (uuid)"
+                          value={lesson.moduleId}
+                          onChange={(v) => setLesson({ ...lesson, moduleId: v })}
+                          placeholder="uuid..."
+                          mono
+                        />
+                        <Field
+                          label="LESSON TITLE"
+                          value={lesson.title}
+                          onChange={(v) => setLesson({ ...lesson, title: v })}
+                          placeholder="Quadratic Equations"
+                        />
+                        <Field
+                          label="YOUTUBE URL"
+                          value={lesson.video}
+                          onChange={(v) => setLesson({ ...lesson, video: v })}
+                          placeholder="https://youtube.com/watch?v=..."
+                          mono
+                        />
+                        <Field
+                          label="POSITION"
+                          value={lesson.position}
+                          onChange={(v) => setLesson({ ...lesson, position: v })}
+                          placeholder="1"
+                          mono
+                        />
+                        <TextArea
+                          label="LESSON NOTES"
+                          value={lesson.notes}
+                          onChange={(v) => setLesson({ ...lesson, notes: v })}
+                          placeholder="Key concepts, formulas, examples..."
+                        />
                       </>
                     )}
                     {section === "ASSESSMENT" && (
                       <>
-                        <Field label="PARENT LESSON ID (uuid)" value={quiz.lessonId} onChange={(v) => setQuiz({ ...quiz, lessonId: v })} placeholder="uuid..." mono />
-                        <Field label="QUIZ TITLE" value={quiz.title} onChange={(v) => setQuiz({ ...quiz, title: v })} placeholder="Quadratic Equations" />
+                        <Field
+                          label="PARENT LESSON ID (uuid)"
+                          value={quiz.lessonId}
+                          onChange={(v) => setQuiz({ ...quiz, lessonId: v })}
+                          placeholder="uuid..."
+                          mono
+                        />
+                        <Field
+                          label="QUIZ TITLE"
+                          value={quiz.title}
+                          onChange={(v) => setQuiz({ ...quiz, title: v })}
+                          placeholder="Quadratic Equations"
+                        />
                         <TextArea
                           label='QUESTIONS (JSON: [{"q":"...","options":["A","B","C","D"],"correct":0}])'
                           value={quiz.json}
@@ -521,19 +683,26 @@ function AdminPage() {
                       disabled={busy}
                       className="w-full label-mono bg-accent text-white py-4 font-bold hover:bg-accent-dim transition-colors mt-px disabled:opacity-50"
                     >
-                      {busy ? "PROCESSING..." : editId && section === "COURSE" ? "UPDATE COURSE →" : `DEPLOY ${section} →`}
+                      {busy
+                        ? "PROCESSING..."
+                        : editId && section === "COURSE"
+                          ? "UPDATE COURSE →"
+                          : `DEPLOY ${section} →`}
                     </button>
                     {editId && section === "COURSE" && (
                       <button
                         type="button"
-                        onClick={() => { setEditId(null); setCourse({ code: "", title: "", description: "", levels: "SS3" }); }}
+                        onClick={() => {
+                          setEditId(null);
+                          setCourse({ code: "", title: "", description: "", levels: "SS3" });
+                        }}
                         className="w-full label-mono bg-bg-surface text-text-muted py-2 text-[10px] hover:text-text-primary"
                       >
                         CANCEL EDIT
                       </button>
                     )}
                   </form>
-                  
+
                   <p className="font-mono text-xs text-text-muted mt-6">
                     // ALL WRITES PERSIST TO SUPABASE. NO UNDO. VERIFY BEFORE DEPLOY.
                   </p>
@@ -541,29 +710,44 @@ function AdminPage() {
               )}
             </div>
 
-            {section !== "REGISTRY" && section !== "OVERVIEW" && section !== "CATALOG" && section !== "ATTEMPTS" && (
-              <div className="mt-10 border-l-2 border-accent bg-bg-surface p-5 max-w-3xl">
-                <span className="label-mono text-accent">// HINT: FETCH IDS</span>
-                <p className="text-text-secondary text-sm mt-2 font-mono">
-                  To get a module/lesson UUID, run on Supabase SQL editor:<br />
-                  <span className="text-text-primary">select id, title from modules where course_id = (select id from courses where code = 'MTH101');</span>
-                </p>
-                <div className="flex gap-3 mt-4">
-                  <button
-                    onClick={async () => {
-                      const { data } = await supabase.from("courses").select("code, id").order("code");
-                      alert((data ?? []).map((c) => `${c.code}: ${c.id}`).join("\n") || "No courses");
-                    }}
-                    className="label-mono border border-border text-text-primary px-4 py-2 hover:border-accent hover:text-accent transition-colors"
-                  >
-                    LIST COURSE IDS
-                  </button>
-                  <Link to="/catalog" className="label-mono flex items-center px-4 py-2 text-accent hover:bg-accent/5 transition-colors">
-                    VIEW CATALOG →
-                  </Link>
+            {section !== "REGISTRY" &&
+              section !== "OVERVIEW" &&
+              section !== "CATALOG" &&
+              section !== "ATTEMPTS" && (
+                <div className="mt-10 border-l-2 border-accent bg-bg-surface p-5 max-w-3xl">
+                  <span className="label-mono text-accent">// HINT: FETCH IDS</span>
+                  <p className="text-text-secondary text-sm mt-2 font-mono">
+                    To get a module/lesson UUID, run on Supabase SQL editor:
+                    <br />
+                    <span className="text-text-primary">
+                      select id, title from modules where course_id = (select id from courses where
+                      code = 'MTH101');
+                    </span>
+                  </p>
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      onClick={async () => {
+                        const { data } = await supabase
+                          .from("courses")
+                          .select("code, id")
+                          .order("code");
+                        alert(
+                          (data ?? []).map((c) => `${c.code}: ${c.id}`).join("\n") || "No courses",
+                        );
+                      }}
+                      className="label-mono border border-border text-text-primary px-4 py-2 hover:border-accent hover:text-accent transition-colors"
+                    >
+                      LIST COURSE IDS
+                    </button>
+                    <Link
+                      to="/catalog"
+                      className="label-mono flex items-center px-4 py-2 text-accent hover:bg-accent/5 transition-colors"
+                    >
+                      VIEW CATALOG →
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </main>
       </div>
@@ -571,7 +755,15 @@ function AdminPage() {
   );
 }
 
-function MetricCard({ label, value, accent }: { label: string; value: number | string; accent?: boolean }) {
+function MetricCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number | string;
+  accent?: boolean;
+}) {
   return (
     <div className={`bg-bg-card p-6 ${accent ? "border-l-2 border-accent" : ""}`}>
       <div className="font-mono text-3xl font-bold text-text-primary">{value}</div>
@@ -580,7 +772,19 @@ function MetricCard({ label, value, accent }: { label: string; value: number | s
   );
 }
 
-function Field({ label, value, onChange, placeholder, mono }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean }) {
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  mono,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  mono?: boolean;
+}) {
   return (
     <div className="bg-bg-card">
       <label className="label-mono text-text-muted block px-4 pt-3">{label}</label>
@@ -595,7 +799,19 @@ function Field({ label, value, onChange, placeholder, mono }: { label: string; v
   );
 }
 
-function TextArea({ label, value, onChange, placeholder, mono }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean }) {
+function TextArea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  mono,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  mono?: boolean;
+}) {
   return (
     <div className="bg-bg-card">
       <label className="label-mono text-text-muted block px-4 pt-3">{label}</label>

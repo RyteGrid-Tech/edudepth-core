@@ -32,17 +32,37 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "EduDepth Concepts" },
-      { name: "description", content: "The operating system for Nigerian students. WAEC, NECO, JAMB — clear with structure." },
+      {
+        name: "description",
+        content:
+          "The operating system for Nigerian students. WAEC, NECO, JAMB — clear with structure.",
+      },
       { name: "author", content: "EduDepth Concepts" },
       { property: "og:title", content: "EduDepth Concepts" },
-      { property: "og:description", content: "The operating system for Nigerian students. WAEC, NECO, JAMB — clear with structure." },
+      {
+        property: "og:description",
+        content:
+          "The operating system for Nigerian students. WAEC, NECO, JAMB — clear with structure.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "EduDepth Concepts" },
-      { name: "twitter:description", content: "The operating system for Nigerian students. WAEC, NECO, JAMB — clear with structure." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/f2EAZztNtsTCd33e5OGeDcyTlzn2/social-images/social-1778075557444-edudepth-trim.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/f2EAZztNtsTCd33e5OGeDcyTlzn2/social-images/social-1778075557444-edudepth-trim.webp" },
+      {
+        name: "twitter:description",
+        content:
+          "The operating system for Nigerian students. WAEC, NECO, JAMB — clear with structure.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/f2EAZztNtsTCd33e5OGeDcyTlzn2/social-images/social-1778075557444-edudepth-trim.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/f2EAZztNtsTCd33e5OGeDcyTlzn2/social-images/social-1778075557444-edudepth-trim.webp",
+      },
     ],
     links: [
       {

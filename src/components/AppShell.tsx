@@ -16,7 +16,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Top nav (desktop) */}
       <header className="sticky top-0 z-40 border-b border-border bg-bg-primary">
         <div className="flex items-center justify-between h-14 px-5 md:px-8">
-          <Link to="/console" className="flex items-center gap-2.5 outline-none focus-visible:ring-0" style={{ WebkitTapHighlightColor: "transparent" }}>
+          <Link
+            to="/console"
+            className="flex items-center gap-2.5 outline-none focus-visible:ring-0"
+            style={{ WebkitTapHighlightColor: "transparent" }}
+          >
             <img src={logo} alt="EduDepth" className="h-7 w-7 object-contain" />
             <span className="text-sm font-bold tracking-wider">EDUDEPTH</span>
             <span className="hidden sm:inline label-mono text-text-muted ml-1">CONCEPTS</span>

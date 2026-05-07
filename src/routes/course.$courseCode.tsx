@@ -66,7 +66,9 @@ function CoursePage() {
         <div className="px-5 md:px-8 py-16 max-w-md mx-auto">
           <div className="border-l-2 border-danger bg-bg-surface p-5">
             <p className="label-mono text-danger">COURSE NOT FOUND</p>
-            <Link to="/catalog" className="inline-block label-mono text-accent mt-4">RETURN TO CATALOG →</Link>
+            <Link to="/catalog" className="inline-block label-mono text-accent mt-4">
+              RETURN TO CATALOG →
+            </Link>
           </div>
         </div>
       </AppShell>
@@ -81,7 +83,9 @@ function CoursePage() {
     <AppShell>
       <div className="px-5 md:px-8 py-8 max-w-5xl mx-auto">
         <p className="font-mono text-xs text-text-muted mb-6">
-          <Link to="/catalog" className="hover:text-accent">CATALOG</Link>
+          <Link to="/catalog" className="hover:text-accent">
+            CATALOG
+          </Link>
           <span className="mx-2 text-border">/</span>
           <span className="text-accent">{course.code}</span>
         </p>
@@ -90,7 +94,9 @@ function CoursePage() {
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <span className="font-mono text-xs text-accent">{course.code}</span>
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1">{course.title}</h1>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1">
+                {course.title}
+              </h1>
             </div>
             {course.class_levels?.[0] && (
               <span className="label-mono text-text-muted border border-border px-3 py-1.5">
@@ -116,7 +122,9 @@ function CoursePage() {
           {modules.length === 0 ? (
             <div className="border-l-2 border-warning bg-bg-surface p-5 mt-4">
               <p className="label-mono text-warning">NO MODULES YET</p>
-              <p className="text-sm text-text-secondary mt-1">This course has no published modules.</p>
+              <p className="text-sm text-text-secondary mt-1">
+                This course has no published modules.
+              </p>
             </div>
           ) : (
             <div className="mt-4 space-y-px bg-border">
@@ -126,12 +134,18 @@ function CoursePage() {
                   <details key={m.id} open={i === 0} className="bg-bg-card group">
                     <summary className="flex items-center justify-between p-5 cursor-pointer list-none hover:bg-bg-surface transition-colors">
                       <div className="flex items-center gap-4">
-                        <span className="font-mono text-xs text-text-muted">M{String(i + 1).padStart(2, "0")}</span>
+                        <span className="font-mono text-xs text-text-muted">
+                          M{String(i + 1).padStart(2, "0")}
+                        </span>
                         <h3 className="text-lg font-bold">{m.title}</h3>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="font-mono text-xs text-text-secondary">{ml.length} LESSONS</span>
-                        <span className="label-mono text-accent group-open:rotate-90 transition-transform">▸</span>
+                        <span className="font-mono text-xs text-text-secondary">
+                          {ml.length} LESSONS
+                        </span>
+                        <span className="label-mono text-accent group-open:rotate-90 transition-transform">
+                          ▸
+                        </span>
                       </div>
                     </summary>
                     <div className="border-t border-border">
@@ -144,14 +158,20 @@ function CoursePage() {
                             params={{ lessonId: l.id }}
                             className="block hover:bg-bg-surface transition-colors"
                           >
-                            <div className={`flex items-center justify-between px-5 py-3.5 border-b border-border last:border-b-0 ${
-                              cleared ? "border-l-2 border-l-success" : ""
-                            }`}>
+                            <div
+                              className={`flex items-center justify-between px-5 py-3.5 border-b border-border last:border-b-0 ${
+                                cleared ? "border-l-2 border-l-success" : ""
+                              }`}
+                            >
                               <div className="flex items-center gap-4 min-w-0">
-                                <span className="font-mono text-xs text-text-muted shrink-0">L{String(j + 1).padStart(2, "0")}</span>
+                                <span className="font-mono text-xs text-text-muted shrink-0">
+                                  L{String(j + 1).padStart(2, "0")}
+                                </span>
                                 <span className="text-sm truncate">{l.title}</span>
                               </div>
-                              <span className={`label-mono ${cleared ? "text-success" : "text-text-muted"}`}>
+                              <span
+                                className={`label-mono ${cleared ? "text-success" : "text-text-muted"}`}
+                              >
                                 {cleared ? "CLEARED" : "—"}
                               </span>
                             </div>

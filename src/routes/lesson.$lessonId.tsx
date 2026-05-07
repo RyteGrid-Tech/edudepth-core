@@ -98,7 +98,9 @@ function LessonPage() {
         <div className="px-5 md:px-8 py-16 max-w-md mx-auto">
           <div className="border-l-2 border-danger bg-bg-surface p-5">
             <p className="label-mono text-danger">LESSON NOT FOUND</p>
-            <Link to="/console" className="inline-block label-mono text-accent mt-4">RETURN TO CONSOLE →</Link>
+            <Link to="/console" className="inline-block label-mono text-accent mt-4">
+              RETURN TO CONSOLE →
+            </Link>
           </div>
         </div>
       </AppShell>
@@ -112,13 +114,17 @@ function LessonPage() {
     <AppShell>
       <div className="px-5 md:px-8 py-6 max-w-6xl mx-auto">
         <p className="font-mono text-xs text-text-muted mb-5">
-          <Link to="/course/$courseCode" params={{ courseCode }} className="hover:text-accent">{courseCode}</Link>
+          <Link to="/course/$courseCode" params={{ courseCode }} className="hover:text-accent">
+            {courseCode}
+          </Link>
           <span className="mx-2 text-border">/</span>
           <span className="text-text-secondary">MODULE {lesson.modules.position}</span>
         </p>
 
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{lesson.title}</h1>
-        {lesson.description && <p className="text-text-secondary mt-1 text-sm">{lesson.description}</p>}
+        {lesson.description && (
+          <p className="text-text-secondary mt-1 text-sm">{lesson.description}</p>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-border mt-6">
           <div className="lg:col-span-2 bg-black aspect-video">

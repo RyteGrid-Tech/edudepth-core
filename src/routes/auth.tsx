@@ -7,7 +7,10 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Access System — EduDepth Concepts" },
-      { name: "description", content: "Initialize your EduDepth account or access an existing session." },
+      {
+        name: "description",
+        content: "Initialize your EduDepth account or access an existing session.",
+      },
     ],
   }),
   component: AuthPage,
@@ -80,7 +83,8 @@ function AuthPage() {
           {/* terminal header */}
           <div className="mb-8">
             <p className="font-mono text-xs text-text-muted">
-              edudepth@auth:~$ <span className="text-accent">{mode === "login" ? "access" : "init"}</span>
+              edudepth@auth:~${" "}
+              <span className="text-accent">{mode === "login" ? "access" : "init"}</span>
               <span className="blink"></span>
             </p>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">
@@ -98,7 +102,10 @@ function AuthPage() {
             {(["login", "signup"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => { setMode(m); setError(null); }}
+                onClick={() => {
+                  setMode(m);
+                  setError(null);
+                }}
                 className={`label-mono py-3 transition-colors ${
                   mode === m
                     ? "bg-bg-card text-accent border-l-2 border-accent"
@@ -162,7 +169,9 @@ function AuthPage() {
                   className="w-full bg-bg-card px-4 py-3.5 text-text-primary outline-none focus:bg-bg-surface border-l-2 border-transparent focus:border-accent font-mono text-sm appearance-none"
                 >
                   {CLASS_LEVELS.map((l) => (
-                    <option key={l} value={l} className="bg-bg-card">{l}</option>
+                    <option key={l} value={l} className="bg-bg-card">
+                      {l}
+                    </option>
                   ))}
                 </select>
               </Field>
@@ -174,7 +183,9 @@ function AuthPage() {
               className="w-full label-mono bg-accent text-white px-6 py-4 font-bold hover:bg-accent-dim transition-colors disabled:opacity-50 mt-px"
             >
               {loading ? (
-                <span>PROCESSING<span className="blink"></span></span>
+                <span>
+                  PROCESSING<span className="blink"></span>
+                </span>
               ) : mode === "login" ? (
                 "ACCESS SYSTEM →"
               ) : (
@@ -198,7 +209,8 @@ function AuthPage() {
           </button>
 
           <p className="font-mono text-xs text-text-muted text-center mt-8 leading-relaxed">
-            BY PROCEEDING YOU ACCEPT THE OPERATING TERMS<br />
+            BY PROCEEDING YOU ACCEPT THE OPERATING TERMS
+            <br />
             OF EDUDEPTH CONCEPTS // RYTEGRID
           </p>
         </div>

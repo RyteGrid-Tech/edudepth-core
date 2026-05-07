@@ -15,22 +15,22 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-  --font-mono: 'Courier New', monospace;
+  --font-mono: "Courier New", monospace;
 }
 
 :root {
-  --bg-primary: #F5F6F8;
-  --bg-surface: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --accent: #2AB8D4;
-  --accent-dim: #1A8FA6;
-  --text-primary: #0A1525;
-  --text-secondary: #6A7D95;
-  --text-muted: #8A9BB5;
-  --border: #D4DBE6;
-  --success: #17A07A;
-  --warning: #F0A500;
-  --danger: #E05C5C;
+  --bg-primary: #f5f6f8;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --accent: #2ab8d4;
+  --accent-dim: #1a8fa6;
+  --text-primary: #0a1525;
+  --text-secondary: #6a7d95;
+  --text-muted: #8a9bb5;
+  --border: #d4dbe6;
+  --success: #17a07a;
+  --warning: #f0a500;
+  --danger: #e05c5c;
 }
 
 @layer base {
@@ -38,18 +38,25 @@
     border-color: var(--border);
     border-radius: 0 !important;
   }
-  html, body {
+  html,
+  body {
     background: var(--bg-primary);
     color: var(--text-primary);
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  ::selection { background: var(--accent); color: #fff; }
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
 }
 
 @layer utilities {
   .label-mono {
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     text-transform: uppercase;
     letter-spacing: 2px;
     font-size: 11px;
@@ -59,13 +66,20 @@
     animation: blink 1s steps(1) infinite;
   }
   @keyframes blink {
-    50% { opacity: 0; }
+    50% {
+      opacity: 0;
+    }
   }
   .pulse-skel {
     animation: pulseSkel 1.4s ease-in-out infinite;
   }
   @keyframes pulseSkel {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 }

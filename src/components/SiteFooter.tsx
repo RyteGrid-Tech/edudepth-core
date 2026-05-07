@@ -8,9 +8,7 @@ export function SiteFooter() {
           </p>
           <p className="label-mono text-text-muted mt-3">EDUDEPTH CONCEPTS // EST. 2026</p>
         </div>
-        <div className="label-mono text-text-muted">
-          A RYTEGRID INFRASTRUCTURE BUILD
-        </div>
+        <div className="label-mono text-text-muted">A RYTEGRID INFRASTRUCTURE BUILD</div>
       </div>
     </footer>
   );

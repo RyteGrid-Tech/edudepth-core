@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useAuth } from "@/lib/auth";
-import { listCourses, listEnrollments, listProgress, listQuizResults, type Course } from "@/lib/api";
+import {
+  listCourses,
+  listEnrollments,
+  listProgress,
+  listQuizResults,
+  type Course,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Account Configuration — EduDepth" }] }),
@@ -22,12 +28,18 @@ function ProfilePage() {
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([listCourses(), listEnrollments(user.id), listProgress(user.id), listQuizResults(user.id)])
-      .then(([c, e, p, r]) => {
-        setEnrolled(c.filter((x) => e.includes(x.id)));
-        const avg = r.length ? Math.round(r.reduce((a, x) => a + (x.score / x.total) * 100, 0) / r.length) : 0;
-        setStats({ lessons: p.filter((x) => x.completed).length, quizzes: r.length, avg });
-      });
+    Promise.all([
+      listCourses(),
+      listEnrollments(user.id),
+      listProgress(user.id),
+      listQuizResults(user.id),
+    ]).then(([c, e, p, r]) => {
+      setEnrolled(c.filter((x) => e.includes(x.id)));
+      const avg = r.length
+        ? Math.round(r.reduce((a, x) => a + (x.score / x.total) * 100, 0) / r.length)
+        : 0;
+      setStats({ lessons: p.filter((x) => x.completed).length, quizzes: r.length, avg });
+    });
   }, [user]);
 
   async function endSession() {
@@ -38,8 +50,12 @@ function ProfilePage() {
   return (
     <AppShell>
       <div className="px-5 md:px-8 py-8 max-w-4xl mx-auto">
-        <p className="font-mono text-xs text-text-muted">edudepth@profile:~$ <span className="text-accent">cat ~/.config</span></p>
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">Account Configuration</h1>
+        <p className="font-mono text-xs text-text-muted">
+          edudepth@profile:~$ <span className="text-accent">cat ~/.config</span>
+        </p>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">
+          Account Configuration
+        </h1>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
           <Field l="OPERATOR ID" v={user?.id ?? "—"} mono />
@@ -82,7 +98,10 @@ function ProfilePage() {
           <div className="mt-10 border-l-2 border-warning bg-bg-surface p-5">
             <span className="label-mono text-warning">// ADMIN PRIVILEGE DETECTED</span>
             <p className="text-text-secondary text-sm mt-2">You have control panel access.</p>
-            <Link to="/admin" className="inline-block label-mono border border-warning text-warning px-4 py-2 mt-4 hover:bg-warning hover:text-white transition-colors">
+            <Link
+              to="/admin"
+              className="inline-block label-mono border border-warning text-warning px-4 py-2 mt-4 hover:bg-warning hover:text-white transition-colors"
+            >
               OPEN CONTROL PANEL →
             </Link>
           </div>
@@ -90,7 +109,9 @@ function ProfilePage() {
 
         <div className="mt-10 border-l-2 border-danger bg-bg-surface p-5">
           <span className="label-mono text-danger">// DANGER ZONE</span>
-          <p className="text-text-secondary text-sm mt-2">Ending session terminates your authenticated state.</p>
+          <p className="text-text-secondary text-sm mt-2">
+            Ending session terminates your authenticated state.
+          </p>
           <button
             onClick={endSession}
             className="label-mono border border-danger text-danger px-5 py-2.5 mt-4 hover:bg-danger hover:text-white transition-colors"
@@ -107,7 +128,11 @@ function Field({ l, v, mono }: { l: string; v: string; mono?: boolean }) {
   return (
     <div className="bg-bg-card p-4">
       <p className="label-mono text-text-muted">{l}</p>
-      <p className={`mt-1.5 ${mono ? "font-mono text-sm break-all" : "text-base"} text-text-primary`}>{v}</p>
+      <p
+        className={`mt-1.5 ${mono ? "font-mono text-sm break-all" : "text-base"} text-text-primary`}
+      >
+        {v}
+      </p>
     </div>
   );
 }

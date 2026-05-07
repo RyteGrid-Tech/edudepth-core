@@ -15,7 +15,9 @@ export function RequireAuth({ children, admin }: { children: React.ReactNode; ad
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <p className="font-mono text-xs text-text-muted">edudepth@system:~$ <span className="text-accent">authenticating...</span></p>
+        <p className="font-mono text-xs text-text-muted">
+          edudepth@system:~$ <span className="text-accent">authenticating...</span>
+        </p>
       </div>
     );
   }

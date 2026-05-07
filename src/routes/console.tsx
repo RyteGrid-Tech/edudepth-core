@@ -80,8 +80,8 @@ function ConsolePage() {
             </p>
             <h1 className="text-3xl font-extrabold tracking-tight mt-3">Almost there.</h1>
             <p className="text-text-secondary mt-2 text-sm leading-relaxed">
-              We detected a new Google deployment. To align your curriculum, we need to index your current academic
-              level.
+              We detected a new Google deployment. To align your curriculum, we need to index your
+              current academic level.
             </p>
           </div>
 
@@ -112,7 +112,9 @@ function ConsolePage() {
             className="w-full label-mono bg-accent text-white px-6 py-4 font-bold hover:bg-accent-dim transition-colors mt-6 disabled:opacity-50"
           >
             {updatingProfile ? (
-              <span>SYNCHRONIZING<span className="blink"></span></span>
+              <span>
+                SYNCHRONIZING<span className="blink"></span>
+              </span>
             ) : (
               "FINALIZE SETUP →"
             )}
@@ -152,7 +154,10 @@ function ConsolePage() {
 
         <div className="flex items-end justify-between mb-5">
           <span className="label-mono text-accent">// DEPLOYED MODULES</span>
-          <Link to="/catalog" className="label-mono text-text-secondary hover:text-accent transition-colors">
+          <Link
+            to="/catalog"
+            className="label-mono text-text-secondary hover:text-accent transition-colors"
+          >
             DEPLOY NEW →
           </Link>
         </div>
@@ -160,7 +165,9 @@ function ConsolePage() {
         {enrolled.length === 0 ? (
           <div className="border-l-2 border-warning bg-bg-surface p-6">
             <p className="label-mono text-warning mb-1">NO MODULES DEPLOYED</p>
-            <p className="text-sm text-text-secondary mb-4">Deploy your first module from the catalog.</p>
+            <p className="text-sm text-text-secondary mb-4">
+              Deploy your first module from the catalog.
+            </p>
             <button
               onClick={() => navigate({ to: "/catalog" })}
               className="label-mono bg-accent text-white px-5 py-2.5 font-bold hover:bg-accent-dim transition-colors"
@@ -180,11 +187,15 @@ function ConsolePage() {
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs text-accent">{m.code}</span>
                   {m.class_levels?.[0] && (
-                    <span className="label-mono text-text-muted border border-border px-2 py-0.5">{m.class_levels[0]}</span>
+                    <span className="label-mono text-text-muted border border-border px-2 py-0.5">
+                      {m.class_levels[0]}
+                    </span>
                   )}
                 </div>
                 <h3 className="text-lg font-bold mt-2">{m.title}</h3>
-                <p className="font-mono text-[11px] text-text-muted mt-1 line-clamp-2">{m.description}</p>
+                <p className="font-mono text-[11px] text-text-muted mt-1 line-clamp-2">
+                  {m.description}
+                </p>
               </Link>
             ))}
           </div>

@@ -57,10 +57,7 @@ export async function listCourses() {
 }
 
 export async function listAllCourses() {
-  const { data, error } = await supabase
-    .from("courses")
-    .select("*")
-    .order("code");
+  const { data, error } = await supabase.from("courses").select("*").order("code");
   if (error) throw error;
   return (data ?? []) as Course[];
 }
@@ -161,12 +158,15 @@ export async function listProgress(userId: string) {
 }
 
 export async function markLessonComplete(userId: string, lessonId: string) {
-  const { error } = await supabase
-    .from("user_progress")
-    .upsert(
-      { user_id: userId, lesson_id: lessonId, completed: true, completed_at: new Date().toISOString() },
-      { onConflict: "user_id,lesson_id" }
-    );
+  const { error } = await supabase.from("user_progress").upsert(
+    {
+      user_id: userId,
+      lesson_id: lessonId,
+      completed: true,
+      completed_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id,lesson_id" },
+  );
   if (error) throw error;
 }
 
@@ -198,7 +198,12 @@ export type QuizResult = {
   quizzes: { title: string; lessons: { title: string; modules: { courses: { code: string } } } };
 };
 
-export async function submitQuizResult(userId: string, quizId: string, score: number, total: number) {
+export async function submitQuizResult(
+  userId: string,
+  quizId: string,
+  score: number,
+  total: number,
+) {
   const { error } = await supabase
     .from("quiz_results")
     .insert({ user_id: userId, quiz_id: quizId, score, total });
@@ -261,7 +266,7 @@ export async function createQuizWithQuestions(
     option_c: string;
     option_d: string;
     correct_option: "a" | "b" | "c" | "d";
-  }>
+  }>,
 ) {
   const { data: quiz, error: qErr } = await supabase
     .from("quizzes")
@@ -280,13 +285,19 @@ export async function getCourseIdByCode(code: string): Promise<string | null> {
 }
 
 // ---------- Profile ----------
-export async function updateProfile(userId: string, updates: { full_name?: string; class_level?: string }) {
+export async function updateProfile(
+  userId: string,
+  updates: { full_name?: string; class_level?: string },
+) {
   const { error } = await supabase.from("profiles").update(updates).eq("id", userId);
   if (error) throw error;
 }
 
 export async function listProfiles() {
-  const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Profile[];
 }
@@ -301,7 +312,10 @@ export async function getPlatformMetrics() {
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("courses").select("id", { count: "exact", head: true }),
     supabase.from("enrollments").select("user_id", { count: "exact", head: true }),
-    supabase.from("user_progress").select("lesson_id", { count: "exact", head: true }).eq("completed", true),
+    supabase
+      .from("user_progress")
+      .select("lesson_id", { count: "exact", head: true })
+      .eq("completed", true),
   ]);
 
   return {

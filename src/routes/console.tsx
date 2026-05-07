@@ -124,7 +124,7 @@ function ConsolePage() {
 
   return (
     <AppShell>
-...
+      <div className="px-5 md:px-8 py-8 max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div>
             <p className="font-mono text-xs text-text-muted">

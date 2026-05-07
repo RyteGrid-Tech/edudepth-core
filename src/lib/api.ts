@@ -56,6 +56,25 @@ export async function listCourses() {
   return (data ?? []) as Course[];
 }
 
+export async function listAllCourses() {
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .order("code");
+  if (error) throw error;
+  return (data ?? []) as Course[];
+}
+
+export async function updateCourse(id: string, updates: Partial<Course>) {
+  const { error } = await supabase.from("courses").update(updates).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteCourse(id: string) {
+  const { error } = await supabase.from("courses").delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function listEnrollments(userId: string) {
   const { data, error } = await supabase
     .from("enrollments")

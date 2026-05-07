@@ -36,6 +36,15 @@ export type Question = {
   position: number;
 };
 
+export type Profile = {
+  id: string;
+  full_name: string;
+  email: string;
+  class_level: string | null;
+  is_admin: boolean;
+  created_at: string;
+};
+
 // ---------- Catalog ----------
 export async function listCourses() {
   const { data, error } = await supabase
@@ -223,5 +232,16 @@ export async function getCourseIdByCode(code: string): Promise<string | null> {
 // ---------- Profile ----------
 export async function updateProfile(userId: string, updates: { full_name?: string; class_level?: string }) {
   const { error } = await supabase.from("profiles").update(updates).eq("id", userId);
+  if (error) throw error;
+}
+
+export async function listProfiles() {
+  const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Profile[];
+}
+
+export async function toggleAdmin(userId: string, isAdmin: boolean) {
+  const { error } = await supabase.from("profiles").update({ is_admin: isAdmin }).eq("id", userId);
   if (error) throw error;
 }

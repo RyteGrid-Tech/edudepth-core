@@ -10,7 +10,12 @@ import {
   getCourseIdByCode,
   listProfiles,
   toggleAdmin,
+  getPlatformMetrics,
+  listAllCourses,
+  updateCourse,
+  deleteCourse,
   type Profile,
+  type Course,
 } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 
@@ -23,14 +28,16 @@ export const Route = createFileRoute("/admin")({
   ),
 });
 
-const SECTIONS = ["REGISTRY", "COURSE", "MODULE", "LESSON", "ASSESSMENT"] as const;
+const SECTIONS = ["OVERVIEW", "REGISTRY", "CATALOG", "COURSE", "MODULE", "LESSON", "ASSESSMENT"] as const;
 type Section = typeof SECTIONS[number];
 
 function AdminPage() {
-  const [section, setSection] = useState<Section>("REGISTRY");
+  const [section, setSection] = useState<Section>("OVERVIEW");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [metrics, setMetrics] = useState({ totalUsers: 0, totalCourses: 0, totalEnrollments: 0, lessonsCompleted: 0 });
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
 
   // form state
   const [course, setCourse] = useState({ code: "", title: "", description: "", levels: "SS3" });
@@ -39,15 +46,33 @@ function AdminPage() {
   const [quiz, setQuiz] = useState({ lessonId: "", title: "", json: "" });
 
   useEffect(() => {
-    if (section === "REGISTRY") {
-      fetchProfiles();
-    }
+    if (section === "REGISTRY") fetchProfiles();
+    if (section === "OVERVIEW") fetchMetrics();
+    if (section === "CATALOG") fetchAllCourses();
   }, [section]);
 
   async function fetchProfiles() {
     try {
       const data = await listProfiles();
       setProfiles(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function fetchMetrics() {
+    try {
+      const data = await getPlatformMetrics();
+      setMetrics(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function fetchAllCourses() {
+    try {
+      const data = await listAllCourses();
+      setAllCourses(data);
     } catch (err) {
       console.error(err);
     }
@@ -65,6 +90,27 @@ function AdminPage() {
       flash(true, "Privileges updated.");
     } catch (err) {
       flash(false, "Failed to update role.");
+    }
+  }
+
+  async function handleTogglePublish(cid: string, current: boolean) {
+    try {
+      await updateCourse(cid, { is_published: !current });
+      setAllCourses(allCourses.map((c) => (c.id === cid ? { ...c, is_published: !current } : c)));
+      flash(true, "Publication status updated.");
+    } catch (err) {
+      flash(false, "Failed to update status.");
+    }
+  }
+
+  async function handleDeleteCourse(cid: string) {
+    if (!confirm("Are you sure? This will delete all modules and lessons for this course.")) return;
+    try {
+      await deleteCourse(cid);
+      setAllCourses(allCourses.filter((c) => c.id !== cid));
+      flash(true, "Course purged from system.");
+    } catch (err) {
+      flash(false, "Deletion failed.");
     }
   }
 
@@ -137,7 +183,7 @@ function AdminPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-px bg-border mt-6 overflow-x-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-px bg-border mt-6 overflow-x-auto">
           {SECTIONS.map((s) => (
             <button
               key={s}
@@ -152,6 +198,15 @@ function AdminPage() {
         </div>
 
         <div className="mt-px">
+          {section === "OVERVIEW" && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
+              <MetricCard label="TOTAL OPERATORS" value={metrics.totalUsers} />
+              <MetricCard label="COURSES DEPLOYED" value={metrics.totalCourses} />
+              <MetricCard label="ACTIVE ENROLLMENTS" value={metrics.totalEnrollments} />
+              <MetricCard label="LESSONS COMPLETED" value={metrics.lessonsCompleted} accent />
+            </div>
+          )}
+
           {section === "REGISTRY" && (
             <div className="bg-bg-card border-x border-b border-border">
               <div className="overflow-x-auto">
@@ -189,13 +244,53 @@ function AdminPage() {
                         </td>
                       </tr>
                     ))}
-                    {profiles.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="p-10 text-center font-mono text-xs text-text-muted">
-                          NO OPERATORS INDEXED.
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {section === "CATALOG" && (
+            <div className="bg-bg-card border-x border-b border-border">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-border bg-bg-surface">
+                      <th className="label-mono p-4 text-text-muted">CODE</th>
+                      <th className="label-mono p-4 text-text-muted">TITLE</th>
+                      <th className="label-mono p-4 text-text-muted">STATUS</th>
+                      <th className="label-mono p-4 text-text-muted text-right">ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allCourses.map((c) => (
+                      <tr key={c.id} className="border-b border-border hover:bg-bg-surface/50 transition-colors">
+                        <td className="p-4 font-mono text-xs text-accent">{c.code}</td>
+                        <td className="p-4">
+                          <p className="font-bold text-sm text-text-primary">{c.title}</p>
+                          <p className="font-mono text-[10px] text-text-muted hidden md:block">{c.description?.substring(0, 60)}...</p>
+                        </td>
+                        <td className="p-4">
+                          <span className={`label-mono text-[9px] px-2 py-0.5 border ${c.is_published ? "border-success text-success" : "border-warning text-warning"}`}>
+                            {c.is_published ? "PUBLISHED" : "DRAFT"}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right space-x-3">
+                          <button
+                            onClick={() => handleTogglePublish(c.id, c.is_published)}
+                            className="label-mono text-[9px] text-accent hover:underline"
+                          >
+                            {c.is_published ? "UNPUBLISH" : "PUBLISH"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCourse(c.id)}
+                            className="label-mono text-[9px] text-danger hover:underline"
+                          >
+                            PURGE
+                          </button>
                         </td>
                       </tr>
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -256,7 +351,7 @@ function AdminPage() {
           // ALL WRITES PERSIST TO SUPABASE. NO UNDO. VERIFY BEFORE DEPLOY.
         </p>
 
-        {section !== "REGISTRY" && (
+        {section !== "REGISTRY" && section !== "OVERVIEW" && section !== "CATALOG" && (
           <div className="mt-10 border-l-2 border-accent bg-bg-surface p-5">
             <span className="label-mono text-accent">// HINT: FETCH IDS</span>
             <p className="text-text-secondary text-sm mt-2 font-mono">
@@ -277,6 +372,15 @@ function AdminPage() {
         )}
       </div>
     </AppShell>
+  );
+}
+
+function MetricCard({ label, value, accent }: { label: string; value: number | string; accent?: boolean }) {
+  return (
+    <div className={`bg-bg-card p-6 ${accent ? "border-l-2 border-accent" : ""}`}>
+      <div className="font-mono text-3xl font-bold text-text-primary">{value}</div>
+      <div className="label-mono text-text-muted mt-2">{label}</div>
+    </div>
   );
 }
 

@@ -100,6 +100,16 @@ export async function getCourseTree(courseId: string) {
   return { modules: (modules ?? []) as Module[], lessons };
 }
 
+export async function updateModule(id: string, updates: Partial<Module>) {
+  const { error } = await supabase.from("modules").update(updates).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteModule(id: string) {
+  const { error } = await supabase.from("modules").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // ---------- Lesson ----------
 export async function getLesson(lessonId: string) {
   const { data, error } = await supabase
@@ -244,4 +254,20 @@ export async function listProfiles() {
 export async function toggleAdmin(userId: string, isAdmin: boolean) {
   const { error } = await supabase.from("profiles").update({ is_admin: isAdmin }).eq("id", userId);
   if (error) throw error;
+}
+
+export async function getPlatformMetrics() {
+  const [profiles, courses, enrollments, progress] = await Promise.all([
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("courses").select("id", { count: "exact", head: true }),
+    supabase.from("enrollments").select("user_id", { count: "exact", head: true }),
+    supabase.from("user_progress").select("lesson_id", { count: "exact", head: true }).eq("completed", true),
+  ]);
+
+  return {
+    totalUsers: profiles.count ?? 0,
+    totalCourses: courses.count ?? 0,
+    totalEnrollments: enrollments.count ?? 0,
+    lessonsCompleted: progress.count ?? 0,
+  };
 }

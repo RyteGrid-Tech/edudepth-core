@@ -43,7 +43,7 @@ function HomePage() {
         </div>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight max-w-4xl">
           The syllabus is fixed.<br />
-          <span className="text-accent">Your strategy</span> shouldn't be.
+          <span className="text-accent">Your strategy</span> shouldnz't be.
         </h1>
         <p className="text-base md:text-lg text-text-secondary mt-6 max-w-2xl leading-relaxed">
           Structure beats motivation. Every time. EduDepth is the operating system for Nigerian students who are done guessing and ready to clear WAEC, NECO and JAMB — by subject, by topic, by result.

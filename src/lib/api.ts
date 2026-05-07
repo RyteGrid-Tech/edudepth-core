@@ -187,6 +187,17 @@ export async function getQuizWithQuestions(quizId: string) {
   return { quiz, questions: (questions ?? []) as Question[] };
 }
 
+export type QuizResult = {
+  id: string;
+  user_id: string;
+  quiz_id: string;
+  score: number;
+  total: number;
+  submitted_at: string;
+  profiles: { full_name: string; email: string };
+  quizzes: { title: string; lessons: { title: string; modules: { courses: { code: string } } } };
+};
+
 export async function submitQuizResult(userId: string, quizId: string, score: number, total: number) {
   const { error } = await supabase
     .from("quiz_results")
@@ -201,6 +212,16 @@ export async function listQuizResults(userId: string) {
     .eq("user_id", userId);
   if (error) throw error;
   return data ?? [];
+}
+
+export async function listAllQuizResults() {
+  const { data, error } = await supabase
+    .from("quiz_results")
+    .select("*, profiles(full_name, email), quizzes(title, lessons(title, modules(courses(code))))")
+    .order("submitted_at", { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  return (data ?? []) as unknown as QuizResult[];
 }
 
 // ---------- Admin inserts ----------

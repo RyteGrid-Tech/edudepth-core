@@ -14,22 +14,28 @@ import {
   listAllCourses,
   updateCourse,
   deleteCourse,
+  listAllQuizResults,
   type Profile,
   type Course,
+  type QuizResult,
 } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import { 
   LayoutDashboard, 
   Users, 
   Library, 
-  PlusCircle, 
   BookOpen, 
   Layers, 
   GraduationCap, 
   FileText,
   ChevronRight,
   Menu,
-  X
+  X,
+  History,
+  Edit2,
+  Trash2,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -44,6 +50,7 @@ export const Route = createFileRoute("/admin")({
 const SECTIONS = [
   { id: "OVERVIEW", label: "Overview", icon: LayoutDashboard },
   { id: "REGISTRY", label: "User Registry", icon: Users },
+  { id: "ATTEMPTS", label: "Quiz Attempts", icon: History },
   { id: "CATALOG", label: "Content Catalog", icon: Library },
   { id: "COURSE", label: "Deploy Course", icon: BookOpen },
   { id: "MODULE", label: "Deploy Module", icon: Layers },
@@ -60,9 +67,11 @@ function AdminPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [metrics, setMetrics] = useState({ totalUsers: 0, totalCourses: 0, totalEnrollments: 0, lessonsCompleted: 0 });
   const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [attempts, setAttempts] = useState<QuizResult[]>([]);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   // form state
+  const [editId, setEditId] = useState<string | null>(null);
   const [course, setCourse] = useState({ code: "", title: "", description: "", levels: "SS3" });
   const [mod, setMod] = useState({ courseCode: "", title: "", position: "1" });
   const [lesson, setLesson] = useState({ moduleId: "", title: "", video: "", notes: "", position: "1" });
@@ -72,6 +81,7 @@ function AdminPage() {
     if (section === "REGISTRY") fetchProfiles();
     if (section === "OVERVIEW") fetchMetrics();
     if (section === "CATALOG") fetchAllCourses();
+    if (section === "ATTEMPTS") fetchAttempts();
   }, [section]);
 
   async function fetchProfiles() {
@@ -96,6 +106,15 @@ function AdminPage() {
     try {
       const data = await listAllCourses();
       setAllCourses(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function fetchAttempts() {
+    try {
+      const data = await listAllQuizResults();
+      setAttempts(data);
     } catch (err) {
       console.error(err);
     }
@@ -137,19 +156,37 @@ function AdminPage() {
     }
   }
 
+  function enterEditCourse(c: Course) {
+    setEditId(c.id);
+    setCourse({
+      code: c.code,
+      title: c.title,
+      description: c.description || "",
+      levels: (c.class_levels || []).join(", "),
+    });
+    setSection("COURSE");
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
       if (section === "COURSE") {
-        await createCourse({
+        const payload = {
           code: course.code.trim(),
           title: course.title.trim(),
           description: course.description.trim(),
           class_levels: course.levels.split(",").map((s) => s.trim()).filter(Boolean),
-        });
-        flash(true, `Course ${course.code} deployed.`);
+        };
+        if (editId) {
+          await updateCourse(editId, payload);
+          flash(true, `Course ${course.code} updated.`);
+        } else {
+          await createCourse({ ...payload, is_published: true });
+          flash(true, `Course ${course.code} deployed.`);
+        }
         setCourse({ code: "", title: "", description: "", levels: "SS3" });
+        setEditId(null);
       } else if (section === "MODULE") {
         const courseId = await getCourseIdByCode(mod.courseCode.trim());
         if (!courseId) throw new Error("Parent course not found.");
@@ -226,6 +263,7 @@ function AdminPage() {
                       setSection(s.id);
                       setMsg(null);
                       setSidebarOpen(false);
+                      if (s.id !== "COURSE") setEditId(null);
                     }}
                     className={`
                       w-full flex items-center gap-3 px-6 py-3.5 label-mono text-[10px] transition-colors
@@ -245,7 +283,7 @@ function AdminPage() {
 
             <div className="p-6 border-t border-border mt-auto">
               <p className="font-mono text-[9px] text-text-muted leading-tight uppercase">
-                RYTEGRID SYSTEM v1.0.4<br />
+                RYTEGRID SYSTEM v1.0.5<br />
                 AUTHORIZED ACCESS ONLY
               </p>
             </div>
@@ -270,7 +308,7 @@ function AdminPage() {
             <p className="font-mono text-xs text-text-muted">edudepth@admin:~$ <span className="text-accent">sudo {section.toLowerCase()}</span></p>
             <div className="flex items-center justify-between flex-wrap gap-3 mt-2 mb-8">
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                {SECTIONS.find(s => s.id === section)?.label}
+                {SECTIONS.find(s => s.id === section)?.label} {editId && section === "COURSE" && "(Editing)"}
               </h1>
               <span className="hidden lg:inline label-mono border border-warning text-warning px-3 py-1.5">ROOT ACCESS</span>
             </div>
@@ -334,6 +372,52 @@ function AdminPage() {
                 </div>
               )}
 
+              {section === "ATTEMPTS" && (
+                <div className="bg-bg-card border border-border">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-border bg-bg-surface">
+                          <th className="label-mono p-4 text-text-muted">STUDENT</th>
+                          <th className="label-mono p-4 text-text-muted">QUIZ / LESSON</th>
+                          <th className="label-mono p-4 text-text-muted">SCORE</th>
+                          <th className="label-mono p-4 text-text-muted text-right">TIMESTAMP</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {attempts.map((a) => (
+                          <tr key={a.id} className="border-b border-border hover:bg-bg-surface/50 transition-colors">
+                            <td className="p-4">
+                              <p className="font-bold text-sm text-text-primary">{a.profiles?.full_name}</p>
+                              <p className="font-mono text-[9px] text-text-muted">{a.profiles?.email}</p>
+                            </td>
+                            <td className="p-4">
+                              <p className="text-xs text-text-primary font-bold">{a.quizzes?.title || a.quizzes?.lessons?.title}</p>
+                              <p className="font-mono text-[9px] text-accent">{a.quizzes?.lessons?.modules?.courses?.code}</p>
+                            </td>
+                            <td className="p-4">
+                              <span className={`font-mono text-sm font-bold ${ (a.score/a.total) >= 0.7 ? "text-success" : "text-danger" }`}>
+                                {a.score}/{a.total}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right font-mono text-[9px] text-text-muted uppercase">
+                              {new Date(a.submitted_at).toLocaleDateString()} {new Date(a.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                          </tr>
+                        ))}
+                        {attempts.length === 0 && (
+                          <tr>
+                            <td colSpan={4} className="p-10 text-center font-mono text-xs text-text-muted">
+                              NO ATTEMPTS RECORDED.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {section === "CATALOG" && (
                 <div className="bg-bg-card border border-border">
                   <div className="overflow-x-auto">
@@ -359,19 +443,30 @@ function AdminPage() {
                                 {c.is_published ? "PUBLISHED" : "DRAFT"}
                               </span>
                             </td>
-                            <td className="p-4 text-right space-x-3">
-                              <button
-                                onClick={() => handleTogglePublish(c.id, c.is_published)}
-                                className="label-mono text-[9px] text-accent hover:underline"
-                              >
-                                {c.is_published ? "UNPUBLISH" : "PUBLISH"}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteCourse(c.id)}
-                                className="label-mono text-[9px] text-danger hover:underline"
-                              >
-                                PURGE
-                              </button>
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-3">
+                                <button
+                                  onClick={() => enterEditCourse(c)}
+                                  className="text-text-muted hover:text-accent transition-colors"
+                                  title="Edit"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleTogglePublish(c.id, c.is_published)}
+                                  className="text-text-muted hover:text-accent transition-colors"
+                                  title={c.is_published ? "Unpublish" : "Publish"}
+                                >
+                                  {c.is_published ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteCourse(c.id)}
+                                  className="text-text-muted hover:text-danger transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -426,8 +521,17 @@ function AdminPage() {
                       disabled={busy}
                       className="w-full label-mono bg-accent text-white py-4 font-bold hover:bg-accent-dim transition-colors mt-px disabled:opacity-50"
                     >
-                      {busy ? "DEPLOYING..." : `DEPLOY ${section} →`}
+                      {busy ? "PROCESSING..." : editId && section === "COURSE" ? "UPDATE COURSE →" : `DEPLOY ${section} →`}
                     </button>
+                    {editId && section === "COURSE" && (
+                      <button
+                        type="button"
+                        onClick={() => { setEditId(null); setCourse({ code: "", title: "", description: "", levels: "SS3" }); }}
+                        className="w-full label-mono bg-bg-surface text-text-muted py-2 text-[10px] hover:text-text-primary"
+                      >
+                        CANCEL EDIT
+                      </button>
+                    )}
                   </form>
                   
                   <p className="font-mono text-xs text-text-muted mt-6">
@@ -437,7 +541,7 @@ function AdminPage() {
               )}
             </div>
 
-            {section !== "REGISTRY" && section !== "OVERVIEW" && section !== "CATALOG" && (
+            {section !== "REGISTRY" && section !== "OVERVIEW" && section !== "CATALOG" && section !== "ATTEMPTS" && (
               <div className="mt-10 border-l-2 border-accent bg-bg-surface p-5 max-w-3xl">
                 <span className="label-mono text-accent">// HINT: FETCH IDS</span>
                 <p className="text-text-secondary text-sm mt-2 font-mono">
@@ -466,47 +570,6 @@ function AdminPage() {
     </AppShell>
   );
 }
-
-function MetricCard({ label, value, accent }: { label: string; value: number | string; accent?: boolean }) {
-  return (
-    <div className={`bg-bg-card p-6 ${accent ? "border-l-2 border-accent" : ""}`}>
-      <div className="font-mono text-3xl font-bold text-text-primary">{value}</div>
-      <div className="label-mono text-text-muted mt-2">{label}</div>
-    </div>
-  );
-}
-
-function Field({ label, value, onChange, placeholder, mono }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean }) {
-  return (
-    <div className="bg-bg-card">
-      <label className="label-mono text-text-muted block px-4 pt-3">{label}</label>
-      <input
-        required
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className={`w-full bg-bg-card px-4 py-3 text-text-primary outline-none focus:bg-bg-surface border-l-2 border-transparent focus:border-accent ${mono ? "font-mono text-sm" : ""}`}
-      />
-    </div>
-  );
-}
-
-function TextArea({ label, value, onChange, placeholder, mono }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean }) {
-  return (
-    <div className="bg-bg-card">
-      <label className="label-mono text-text-muted block px-4 pt-3">{label}</label>
-      <textarea
-        required
-        rows={5}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className={`w-full bg-bg-card px-4 py-3 text-text-primary outline-none focus:bg-bg-surface border-l-2 border-transparent focus:border-accent resize-none ${mono ? "font-mono text-sm" : ""}`}
-      />
-    </div>
-  );
-}
-
 
 function MetricCard({ label, value, accent }: { label: string; value: number | string; accent?: boolean }) {
   return (

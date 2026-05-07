@@ -219,3 +219,9 @@ export async function getCourseIdByCode(code: string): Promise<string | null> {
   const { data } = await supabase.from("courses").select("id").eq("code", code).maybeSingle();
   return (data?.id as string) ?? null;
 }
+
+// ---------- Profile ----------
+export async function updateProfile(userId: string, updates: { full_name?: string; class_level?: string }) {
+  const { error } = await supabase.from("profiles").update(updates).eq("id", userId);
+  if (error) throw error;
+}

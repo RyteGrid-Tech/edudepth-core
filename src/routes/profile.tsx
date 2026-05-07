@@ -1,18 +1,37 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { MOCK_USER, MOCK_MODULES } from "@/lib/mockData";
+import { RequireAuth } from "@/components/RequireAuth";
+import { useAuth } from "@/lib/auth";
+import { listCourses, listEnrollments, listProgress, listQuizResults, type Course } from "@/lib/api";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Account Configuration — EduDepth" }] }),
-  component: ProfilePage,
+  component: () => (
+    <RequireAuth>
+      <ProfilePage />
+    </RequireAuth>
+  ),
 });
 
 function ProfilePage() {
   const navigate = useNavigate();
-  const enrolled = MOCK_MODULES.filter((m) => m.enrolled);
+  const { user, profile, signOut } = useAuth();
+  const [enrolled, setEnrolled] = useState<Course[]>([]);
+  const [stats, setStats] = useState({ lessons: 0, quizzes: 0, avg: 0 });
 
-  function endSession() {
-    // TODO: connect to Supabase — supabase.auth.signOut()
+  useEffect(() => {
+    if (!user) return;
+    Promise.all([listCourses(), listEnrollments(user.id), listProgress(user.id), listQuizResults(user.id)])
+      .then(([c, e, p, r]) => {
+        setEnrolled(c.filter((x) => e.includes(x.id)));
+        const avg = r.length ? Math.round(r.reduce((a, x) => a + (x.score / x.total) * 100, 0) / r.length) : 0;
+        setStats({ lessons: p.filter((x) => x.completed).length, quizzes: r.length, avg });
+      });
+  }, [user]);
+
+  async function endSession() {
+    await signOut();
     navigate({ to: "/" });
   }
 
@@ -22,43 +41,44 @@ function ProfilePage() {
         <p className="font-mono text-xs text-text-muted">edudepth@profile:~$ <span className="text-accent">cat ~/.config</span></p>
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">Account Configuration</h1>
 
-        {/* identity */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
-          <Field l="OPERATOR ID" v={MOCK_USER.id} mono />
-          <Field l="FULL NAME" v={MOCK_USER.name} />
-          <Field l="EMAIL ADDRESS" v={MOCK_USER.email} mono />
-          <Field l="CLASS LEVEL" v={MOCK_USER.level} />
+          <Field l="OPERATOR ID" v={user?.id ?? "—"} mono />
+          <Field l="FULL NAME" v={profile?.full_name ?? "—"} />
+          <Field l="EMAIL ADDRESS" v={profile?.email ?? "—"} mono />
+          <Field l="CLASS LEVEL" v={profile?.class_level ?? "—"} />
         </div>
 
-        {/* stats */}
         <span className="label-mono text-accent mt-10 inline-block">// LIFETIME METRICS</span>
         <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
           <Stat l="MODULES" v={String(enrolled.length).padStart(2, "0")} />
-          <Stat l="LESSONS CLEARED" v="047" />
-          <Stat l="ASSESSMENTS RUN" v="023" />
-          <Stat l="AVG SCORE" v="82%" accent />
+          <Stat l="LESSONS CLEARED" v={String(stats.lessons).padStart(3, "0")} />
+          <Stat l="ASSESSMENTS RUN" v={String(stats.quizzes).padStart(3, "0")} />
+          <Stat l="AVG SCORE" v={stats.quizzes ? `${stats.avg}%` : "—"} accent />
         </div>
 
-        {/* enrolled */}
         <span className="label-mono text-accent mt-10 inline-block">// DEPLOYED MODULES</span>
-        <div className="mt-3 space-y-px bg-border">
-          {enrolled.map((m) => (
-            <Link
-              key={m.code}
-              to="/course/$courseCode"
-              params={{ courseCode: m.code }}
-              className="bg-bg-card p-4 flex items-center justify-between hover:bg-bg-surface transition-colors"
-            >
-              <div className="flex items-center gap-4">
-                <span className="font-mono text-xs text-accent">{m.code}</span>
-                <span className="text-text-primary">{m.title}</span>
-              </div>
-              <span className="font-mono text-xs text-text-secondary">{m.progress}%</span>
-            </Link>
-          ))}
-        </div>
+        {enrolled.length === 0 ? (
+          <p className="font-mono text-xs text-text-muted mt-3">No modules deployed yet.</p>
+        ) : (
+          <div className="mt-3 space-y-px bg-border">
+            {enrolled.map((m) => (
+              <Link
+                key={m.code}
+                to="/course/$courseCode"
+                params={{ courseCode: m.code }}
+                className="bg-bg-card p-4 flex items-center justify-between hover:bg-bg-surface transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <span className="font-mono text-xs text-accent">{m.code}</span>
+                  <span className="text-text-primary">{m.title}</span>
+                </div>
+                <span className="label-mono text-text-muted">OPEN →</span>
+              </Link>
+            ))}
+          </div>
+        )}
 
-        {MOCK_USER.is_admin && (
+        {profile?.is_admin && (
           <div className="mt-10 border-l-2 border-warning bg-bg-surface p-5">
             <span className="label-mono text-warning">// ADMIN PRIVILEGE DETECTED</span>
             <p className="text-text-secondary text-sm mt-2">You have control panel access.</p>
@@ -68,7 +88,6 @@ function ProfilePage() {
           </div>
         )}
 
-        {/* danger zone */}
         <div className="mt-10 border-l-2 border-danger bg-bg-surface p-5">
           <span className="label-mono text-danger">// DANGER ZONE</span>
           <p className="text-text-secondary text-sm mt-2">Ending session terminates your authenticated state.</p>
@@ -88,7 +107,7 @@ function Field({ l, v, mono }: { l: string; v: string; mono?: boolean }) {
   return (
     <div className="bg-bg-card p-4">
       <p className="label-mono text-text-muted">{l}</p>
-      <p className={`mt-1.5 ${mono ? "font-mono text-sm" : "text-base"} text-text-primary`}>{v}</p>
+      <p className={`mt-1.5 ${mono ? "font-mono text-sm break-all" : "text-base"} text-text-primary`}>{v}</p>
     </div>
   );
 }

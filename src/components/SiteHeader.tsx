@@ -4,8 +4,8 @@ import logo from "@/assets/edudepth-logo.png";
 export function SiteHeader() {
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between h-14 px-5 md:px-8 border-b border-border bg-bg-surface">
-      <Link to="/" className="flex items-center gap-2.5">
-        <img src={logo} alt="EduDepth Concepts" className="h-7 w-7 object-contain bg-text-primary p-0.5" />
+      <Link to="/" className="flex items-center gap-2.5 outline-none focus-visible:ring-0" style={{ WebkitTapHighlightColor: "transparent" }}>
+        <img src={logo} alt="EduDepth Concepts" className="h-7 w-7 object-contain" />
         <span className="text-sm font-bold tracking-wider text-text-primary">EDUDEPTH</span>
         <span className="hidden sm:inline label-mono text-text-muted ml-1">CONCEPTS</span>
       </Link>

@@ -183,14 +183,23 @@ function AdminPage() {
     setBusy(true);
     try {
       if (section === "COURSE") {
+        if (!course.code.trim() || !course.title.trim()) {
+          throw new Error("Course code and title are required.");
+        }
+        const levelsArray = course.levels
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        if (levelsArray.length === 0) {
+          throw new Error("At least one class level (e.g., SS3) is required.");
+        }
+
         const payload = {
-          code: course.code.trim(),
+          code: course.code.trim().toUpperCase(),
           title: course.title.trim(),
           description: course.description.trim(),
-          class_levels: course.levels
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean),
+          class_levels: levelsArray,
         };
         if (editId) {
           await updateCourse(editId, payload);
@@ -202,39 +211,60 @@ function AdminPage() {
         setCourse({ code: "", title: "", description: "", levels: "SS3" });
         setEditId(null);
       } else if (section === "MODULE") {
+        if (!mod.courseCode.trim() || !mod.title.trim()) {
+          throw new Error("Parent course code and module title are required.");
+        }
         const courseId = await getCourseIdByCode(mod.courseCode.trim());
-        if (!courseId) throw new Error("Parent course not found.");
+        if (!courseId) throw new Error(`Course with code "${mod.courseCode}" not found.`);
         await createModule({
           course_id: courseId,
           title: mod.title.trim(),
-          position: Number(mod.position),
+          position: Number(mod.position) || 1,
         });
         flash(true, "Module deployed.");
         setMod({ courseCode: "", title: "", position: "1" });
       } else if (section === "LESSON") {
+        if (!lesson.moduleId.trim() || !lesson.title.trim()) {
+          throw new Error("Module ID and lesson title are required.");
+        }
         await createLesson({
           module_id: lesson.moduleId.trim(),
           title: lesson.title.trim(),
           video_url: lesson.video.trim(),
           notes_text: lesson.notes,
-          position: Number(lesson.position),
+          position: Number(lesson.position) || 1,
         });
         flash(true, "Lesson registered.");
         setLesson({ moduleId: "", title: "", video: "", notes: "", position: "1" });
       } else if (section === "ASSESSMENT") {
-        const parsed = JSON.parse(quiz.json) as Array<{
-          q: string;
-          options: [string, string, string, string];
-          correct: 0 | 1 | 2 | 3;
-        }>;
-        const questions = parsed.map((q) => ({
-          question_text: q.q,
-          option_a: q.options[0],
-          option_b: q.options[1],
-          option_c: q.options[2],
-          option_d: q.options[3],
-          correct_option: (["a", "b", "c", "d"] as const)[q.correct],
-        }));
+        if (!quiz.lessonId.trim() || !quiz.json.trim()) {
+          throw new Error("Lesson ID and questions JSON are required.");
+        }
+        let parsed;
+        try {
+          parsed = JSON.parse(quiz.json);
+        } catch (e) {
+          throw new Error("Invalid JSON format in questions field.");
+        }
+
+        if (!Array.isArray(parsed)) {
+          throw new Error("Questions JSON must be an array.");
+        }
+
+        const questions = parsed.map((q, idx) => {
+          if (!q.q || !q.options || !Array.isArray(q.options) || q.options.length < 4) {
+            throw new Error(`Question at index ${idx} is missing required fields or has invalid options.`);
+          }
+          return {
+            question_text: q.q,
+            option_a: q.options[0],
+            option_b: q.options[1],
+            option_c: q.options[2],
+            option_d: q.options[3],
+            correct_option: (["a", "b", "c", "d"] as const)[q.correct] || "a",
+          };
+        });
+
         await createQuizWithQuestions(
           quiz.lessonId.trim(),
           quiz.title.trim() || "Assessment",
@@ -243,8 +273,9 @@ function AdminPage() {
         flash(true, `Assessment with ${questions.length} questions created.`);
         setQuiz({ lessonId: "", title: "", json: "" });
       }
-    } catch (err) {
-      flash(false, err instanceof Error ? err.message : "Operation failed.");
+    } catch (err: any) {
+      console.error("Admin operation failed:", err);
+      flash(false, err?.message || "Operation failed.");
     } finally {
       setBusy(false);
     }
@@ -509,9 +540,11 @@ function AdminPage() {
                             <td className="p-4 font-mono text-xs text-accent">{c.code}</td>
                             <td className="p-4">
                               <p className="font-bold text-sm text-text-primary">{c.title}</p>
-                              <p className="font-mono text-[10px] text-text-muted hidden md:block">
-                                {c.description?.substring(0, 60)}...
-                              </p>
+                              {c.description && (
+                                <p className="font-mono text-[10px] text-text-muted hidden md:block">
+                                  {c.description.substring(0, 60)}...
+                                </p>
+                              )}
                             </td>
                             <td className="p-4">
                               <span

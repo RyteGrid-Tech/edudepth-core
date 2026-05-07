@@ -1,28 +1,63 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { MOCK_MODULES } from "@/lib/mockData";
+import { RequireAuth } from "@/components/RequireAuth";
+import { useAuth } from "@/lib/auth";
+import { enroll, listCourses, listEnrollments, type Course } from "@/lib/api";
 
 export const Route = createFileRoute("/catalog")({
   head: () => ({ meta: [{ title: "Module Catalog — EduDepth" }] }),
-  component: CatalogPage,
+  component: () => (
+    <RequireAuth>
+      <CatalogPage />
+    </RequireAuth>
+  ),
 });
 
-const LEVELS = ["ALL", "SS1", "SS2", "SS3", "JAMB"];
+const LEVELS = ["ALL", "JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3", "Post-secondary"];
 const STATUSES = ["ALL", "ENROLLED", "AVAILABLE"];
 
 function CatalogPage() {
+  const { user } = useAuth();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [enrolledIds, setEnrolledIds] = useState<string[]>([]);
   const [level, setLevel] = useState("ALL");
   const [status, setStatus] = useState("ALL");
   const [query, setQuery] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
 
-  const filtered = MOCK_MODULES.filter((m) => {
-    if (level !== "ALL" && m.level !== level) return false;
-    if (status === "ENROLLED" && !m.enrolled) return false;
-    if (status === "AVAILABLE" && m.enrolled) return false;
-    if (query && !m.title.toLowerCase().includes(query.toLowerCase()) && !m.code.toLowerCase().includes(query.toLowerCase())) return false;
-    return true;
-  });
+  useEffect(() => {
+    if (!user) return;
+    listCourses().then(setCourses);
+    listEnrollments(user.id).then(setEnrolledIds);
+  }, [user]);
+
+  async function handleEnroll(courseId: string) {
+    if (!user) return;
+    setBusyId(courseId);
+    try {
+      await enroll(user.id, courseId);
+      setEnrolledIds((ids) => [...ids, courseId]);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const filtered = useMemo(() => {
+    return courses.filter((m) => {
+      const isEnrolled = enrolledIds.includes(m.id);
+      if (level !== "ALL" && !(m.class_levels ?? []).includes(level)) return false;
+      if (status === "ENROLLED" && !isEnrolled) return false;
+      if (status === "AVAILABLE" && isEnrolled) return false;
+      if (
+        query &&
+        !m.title.toLowerCase().includes(query.toLowerCase()) &&
+        !m.code.toLowerCase().includes(query.toLowerCase())
+      )
+        return false;
+      return true;
+    });
+  }, [courses, enrolledIds, level, status, query]);
 
   return (
     <AppShell>
@@ -31,7 +66,6 @@ function CatalogPage() {
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">Module Catalog</h1>
         <p className="text-text-secondary mt-1">Deploy modules to your operation. Filter by level or status.</p>
 
-        {/* filter bar */}
         <div className="mt-8 border border-border bg-bg-surface">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
             <FilterGroup label="LEVEL" options={LEVELS} value={level} onChange={setLevel} />
@@ -59,52 +93,42 @@ function CatalogPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border mt-4">
-            {filtered.map((m) => (
-              <div key={m.code} className="bg-bg-card p-5 group hover:bg-bg-surface transition-colors border-l-2 border-transparent hover:border-accent">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono text-xs text-accent">{m.code}</span>
-                  <span className="label-mono text-text-muted border border-border px-2 py-0.5">{m.level}</span>
+            {filtered.map((m) => {
+              const isEnrolled = enrolledIds.includes(m.id);
+              return (
+                <div key={m.code} className="bg-bg-card p-5 group hover:bg-bg-surface transition-colors border-l-2 border-transparent hover:border-accent">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-xs text-accent">{m.code}</span>
+                    {m.class_levels?.[0] && (
+                      <span className="label-mono text-text-muted border border-border px-2 py-0.5">{m.class_levels[0]}</span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold">{m.title}</h3>
+                  <p className="font-mono text-[11px] text-text-muted mt-2 mb-4 line-clamp-3">{m.description}</p>
+                  {isEnrolled ? (
+                    <Link
+                      to="/course/$courseCode"
+                      params={{ courseCode: m.code }}
+                      className="block label-mono text-center bg-bg-surface text-accent border border-accent py-2.5 hover:bg-accent hover:text-white transition-colors"
+                    >
+                      OPEN MODULE →
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => handleEnroll(m.id)}
+                      disabled={busyId === m.id}
+                      className="block w-full label-mono bg-accent text-white py-2.5 font-bold hover:bg-accent-dim transition-colors disabled:opacity-50"
+                    >
+                      {busyId === m.id ? "DEPLOYING..." : "DEPLOY MODULE →"}
+                    </button>
+                  )}
                 </div>
-                <h3 className="text-lg font-bold">{m.title}</h3>
-                <div className="grid grid-cols-3 gap-px bg-border mt-4 mb-4">
-                  <Stat n={m.modules} l="MODS" />
-                  <Stat n={m.lessons} l="LESSONS" />
-                  <Stat n={m.quizzes} l="QUIZ" />
-                </div>
-                <p className="font-mono text-[11px] text-text-muted mb-4">
-                  {m.students.toLocaleString()} OPERATORS ENROLLED
-                </p>
-                {m.enrolled ? (
-                  <Link
-                    to="/course/$courseCode"
-                    params={{ courseCode: m.code }}
-                    className="block label-mono text-center bg-bg-surface text-accent border border-accent py-2.5 hover:bg-accent hover:text-white transition-colors"
-                  >
-                    OPEN MODULE →
-                  </Link>
-                ) : (
-                  <button
-                    onClick={() => {/* TODO: connect to Supabase — insert into enrollments */}}
-                    className="block w-full label-mono bg-accent text-white py-2.5 font-bold hover:bg-accent-dim transition-colors"
-                  >
-                    DEPLOY MODULE →
-                  </button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
     </AppShell>
-  );
-}
-
-function Stat({ n, l }: { n: number; l: string }) {
-  return (
-    <div className="bg-bg-card py-2 text-center">
-      <div className="font-mono text-base font-bold">{n}</div>
-      <div className="label-mono text-text-muted text-[9px]">{l}</div>
-    </div>
   );
 }
 
